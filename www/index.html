@@ -10,7 +10,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Finlandica:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-deep: #0d1d18;
@@ -31,13 +31,13 @@
       height: 100%;
       overflow: hidden;
       background-color: var(--bg-deep);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Finlandica', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .font-question {
-      font-family: 'Oswald', 'Inter', sans-serif;
+      font-family: 'Finlandica', sans-serif;
       letter-spacing: 0.01em;
-      line-height: 1.18;
+      line-height: 1.08;
     }
 
     /* Аппаратное ускорение для плавных 60 FPS */
@@ -98,11 +98,11 @@
 <body class="flex items-center justify-center w-screen h-screen overflow-hidden bg-[#0c1a16]">
 
   <!-- Внешняя обертка: на ПК отображает стильный мобильный экран по центру (или во весь экран по кнопке), на смартфоне занимает 100% экрана -->
-  <div id="app-shell" class="relative w-full h-full sm:max-w-[420px] sm:h-[min(96vh,875px)] sm:rounded-[34px] sm:shadow-[0_28px_80px_rgba(0,0,0,0.75)] sm:border-[5px] sm:border-stone-800/90 overflow-hidden flex flex-col justify-between transition-all duration-300 bg-[#CCA36E]">
+  <div id="app-shell" class="relative w-full h-full sm:max-w-[360px] sm:h-[min(95vh,780px)] sm:rounded-[28px] sm:shadow-[0_28px_80px_rgba(0,0,0,0.75)] sm:border-[4px] sm:border-stone-800/90 overflow-hidden flex flex-col justify-between transition-all duration-300 bg-[#CCA36E]">
 
     <!-- ==================== ФОНОВАЯ АНИМИРОВАННАЯ SVG-СЦЕНА С МАСЛКАРОМ ==================== -->
     <div class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-      <svg id="scene-svg" class="w-full h-full block" viewBox="55 135 890 1580" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+      <svg id="scene-svg" class="w-full h-auto block" viewBox="0 0 1000 2400" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <!-- Мягкий ореол вокруг луны -->
           <radialGradient id="moon-halo-grad" cx="50%" cy="50%" r="50%">
@@ -329,13 +329,13 @@
         </defs>
 
         <!-- 1. НЕБО И ДАЛЬНИЙ ЛЕС -->
-        <rect x="-200" y="0" width="1500" height="2200" fill="#18352D" />
+        <rect x="-200" y="0" width="1500" height="2500" fill="#18352D" />
 
         <!-- Ночное небо со звездами и полумесяцем (включается на 10 вопросе) -->
         <g id="night-sky-layer" opacity="0" style="transition: opacity 0.6s ease;">
           <rect x="-200" y="0" width="1500" height="700" fill="url(#night-sky-grad)" />
-          <circle cx="210" cy="215" r="72" fill="url(#moon-halo-grad)" />
-          <path d="M 200,186 A 26,26 0 1,0 228,230 A 21,21 0 1,1 200,186 Z" fill="#EBF6FA" opacity="0.92" />
+          <circle cx="155" cy="115" r="76" fill="url(#moon-halo-grad)" />
+          <path d="M 145,86 A 28,28 0 1,0 174,132 A 23,23 0 1,1 145,86 Z" fill="#EBF6FA" opacity="0.9" />
           <g id="night-stars" fill="#E8F4F8">
             <circle cx="125" cy="165" r="1.8" opacity="0.8" />
             <circle cx="285" cy="158" r="2.1" opacity="0.9" />
@@ -369,14 +369,14 @@
         <g id="parallax-front" class="gpu-layer"></g>
 
         <!-- 3. ДОРОГА (продлена вниз до y=2200 для мобильных экранов любой высоты) -->
-        <polygon points="-200,692.7 1200,226 1200,2200 -200,2200" fill="#CCA36E" />
+        <polygon points="-200,692.7 1200,226 1200,2500 -200,2500" fill="#CCA36E" />
         <polygon points="-200,692.7 1200,226 1200,232 -200,698.7" fill="#B68D58" opacity="0.65" />
 
         <g id="parallax-road" class="gpu-layer"></g>
         <g id="dust-layer"></g>
 
         <!-- Ночное затенение окружения -->
-        <rect id="evening-overlay" x="-200" y="0" width="1500" height="2200" fill="url(#night-env-grad)" opacity="0" pointer-events="none" style="transition: opacity 0.6s ease;" />
+        <rect id="evening-overlay" x="-200" y="0" width="1500" height="2500" fill="url(#night-env-grad)" opacity="0" pointer-events="none" style="transition: opacity 0.6s ease;" />
 
         <!-- 4. АВТОМОБИЛЬ -->
         <g id="car-master" class="gpu-layer">
@@ -503,132 +503,107 @@
       </svg>
     </div>
 
-    <!-- ==================== ВЕРХНЯЯ ПАНЕЛЬ (ИКОНКИ + БЕЛАЯ НАВИГАЦИОННАЯ ПЛАШКА КАК В 51.PNG) ==================== -->
-    <header class="relative z-10 px-4 pt-3 pb-1 flex flex-col gap-2.5 shrink-0">
+    <!-- ==================== ВЕРХНЯЯ ПАНЕЛЬ (ТОЧНО КАК НА СКРИНШОТЕ 51.PNG) ==================== -->
+    <header class="relative z-10 px-[20px] pt-[10px] pb-1 flex flex-col gap-[8px] shrink-0">
       <!-- Верхний ряд иконок: Шестеренка слева, Звук справа -->
-      <div class="flex items-center justify-between px-0.5">
+      <div class="flex items-center justify-between h-[26px]">
         <button id="settings-btn" type="button" aria-label="Настройки и GitHub Actions"
-          class="w-9 h-9 rounded-full flex items-center justify-center text-white/95 hover:text-white hover:bg-black/25 active:scale-95 transition">
-          <!-- Иконка шестеренки в стиле 51.png -->
-          <svg class="w-6 h-6 drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          class="w-7 h-7 -ml-1 rounded-full flex items-center justify-center text-white hover:bg-black/20 active:scale-95 transition">
+          <svg class="w-[22px] h-[22px] drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
 
-        <!-- Индикатор текущей скорости и режима (ненавязчивый чип между иконками) -->
-        <div id="telemetry-pill" class="px-3 py-1 rounded-full bg-black/35 backdrop-blur-md border border-white/15 text-[11px] font-semibold text-amber-100 flex items-center gap-1.5 shadow-sm">
-          <span id="mode-indicator-icon">☀️</span>
-          <span id="speed-indicator-text">60 КМ/Ч</span>
-        </div>
-
         <button id="mute-btn" type="button" aria-label="Включить или выключить звук"
-          class="w-9 h-9 rounded-full flex items-center justify-center text-white/95 hover:text-white hover:bg-black/25 active:scale-95 transition">
-          <!-- Иконка звука выкл (как в 51.png) -->
-          <svg id="icon-sound-off" class="w-6 h-6 drop-shadow" viewBox="0 0 24 24" fill="currentColor">
+          class="w-7 h-7 -mr-1 rounded-full flex items-center justify-center text-white hover:bg-black/20 active:scale-95 transition">
+          <svg id="icon-sound-off" class="w-[22px] h-[22px] drop-shadow" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
             <path d="M22 9l-6 6M16 9l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
           </svg>
-          <!-- Иконка звука вкл -->
-          <svg id="icon-sound-on" class="w-6 h-6 drop-shadow hidden" viewBox="0 0 24 24" fill="currentColor">
+          <svg id="icon-sound-on" class="w-[22px] h-[22px] drop-shadow hidden" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
           </svg>
         </button>
       </div>
 
-      <!-- Белая навигационная плашка: НАЗАД | АВТО | ВОПРОС X -->
-      <div class="bg-white rounded-[10px] px-4 py-2.5 shadow-[0_6px_20px_rgba(0,0,0,0.18)] flex items-center justify-between">
+      <!-- Белая навигационная плашка: НАЗАД | АВТО | ВОПРОС X (Finlandica Regular 14px и Bold 14px) -->
+      <div class="bg-white rounded-[6px] h-[38px] px-[16px] shadow-sm flex items-center justify-between">
         <button id="back-btn" type="button"
-          class="text-[13px] font-medium text-[#374151] hover:text-[#F18121] active:scale-95 transition uppercase tracking-wide min-w-[68px] text-left">
+          class="text-[14px] font-normal text-[#333333] hover:text-[#F18121] active:scale-95 transition uppercase min-w-[70px] text-left">
           НАЗАД
         </button>
-        <span class="text-[14px] font-extrabold text-[#1F2937] uppercase tracking-wider">
+        <span class="text-[14px] font-bold text-[#262626] uppercase">
           АВТО
         </span>
-        <span id="question-counter" class="text-[13px] font-medium text-[#374151] uppercase tracking-wide min-w-[68px] text-right">
+        <span id="question-counter" class="text-[14px] font-normal text-[#333333] uppercase min-w-[70px] text-right">
           ВОПРОС 1
         </span>
       </div>
     </header>
 
-    <!-- Свободное окно обзора автомобиля в верхней половине экрана + уведомление о выезде за кадр -->
-    <div class="relative z-10 flex-1 flex flex-col justify-end items-center px-4 pb-2 pointer-events-none">
-      <div id="departure-banner" class="hidden mb-2 px-4 py-2 rounded-2xl bg-stone-950/85 backdrop-blur-md border border-amber-400/40 text-amber-200 text-xs font-bold tracking-wider uppercase shadow-xl animate-pulse">
-        🏁 Все ответы даны! Автомобиль уходит за горизонт...
-      </div>
-    </div>
+    <!-- Свободное окно обзора автомобиля в верхней половине экрана -->
+    <div class="relative z-10 flex-1 pointer-events-none"></div>
 
     <!-- ==================== НИЖНЯЯ БЕЛАЯ КАРТОЧКА ВИКТОРИНЫ (ТОЧНО КАК В 51.PNG) ==================== -->
-    <main class="relative z-10 px-4 pb-4 shrink-0">
+    <main class="relative z-10 px-[20px] pb-[20px] shrink-0 h-[63.8%] flex flex-col justify-end">
 
-      <!-- ЭКРАН ВОПРОСОВ -->
-      <section id="quiz-card" class="bg-white rounded-[22px] px-5 pt-5 pb-5 shadow-[0_14px_40px_rgba(0,0,0,0.22)] flex flex-col justify-between min-h-[455px] sm:min-h-[470px] transition-all duration-300">
+      <!-- ЭКРАН ВОПРОСОВ: внутренние отступы 25px сверху и по 20px слева/справа/снизу -->
+      <section id="quiz-card" class="bg-white rounded-[16px] px-[20px] pt-[25px] pb-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.14)] flex flex-col justify-between h-full transition-all duration-300">
 
-        <div>
-          <!-- Прогресс-бар вверху карточки -->
-          <div class="w-full h-[3.5px] bg-[#E5E7EB] rounded-full overflow-hidden mb-5">
+        <div class="shrink-0">
+          <!-- Прогресс-бар вверху карточки (высота 3px, отступ вниз 22px) -->
+          <div class="w-full h-[3px] bg-[#E5E5E5] rounded-full overflow-hidden mb-[22px]">
             <div id="progress-bar" class="h-full bg-[#F18121] rounded-full transition-all duration-300" style="width: 10%;"></div>
           </div>
 
-          <!-- Текст вопроса крупным капсом -->
-          <h1 id="question-text" class="font-question text-[22px] sm:text-[24px] font-bold text-[#262626] uppercase mb-4 min-h-[78px] flex items-center">
+          <!-- Текст вопроса: Finlandica Bold, 23px, межстрочный 1.08, капс -->
+          <h1 id="question-text" class="font-question text-[23px] font-bold text-[#333333] uppercase mb-[18px] min-h-[70px]">
             КАКАЯ ИЗ ЭТИХ МАРОК ВХОДИТ В СОСТАВ VOLKSWAGEN GROUP?
           </h1>
         </div>
 
-        <!-- Сетка 2x2 с вариантами ответов A, B, C, D -->
-        <div id="options-grid" class="grid grid-cols-2 gap-3 my-auto">
+        <!-- Сетка 2x2 с вариантами ответов A, B, C, D (flex-1 min-h-0 гарантирует, что карточки никогда не наедут на кнопку) -->
+        <div id="options-grid" class="grid grid-cols-2 grid-rows-2 gap-[11px] flex-1 min-h-0">
           <!-- Карточка A -->
-          <button type="button" data-index="0" class="option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]">
-            <span class="opt-letter text-[14px] font-bold text-[#262626] leading-tight mb-1">A</span>
-            <span class="opt-label text-[14px] font-semibold text-[#333333] uppercase leading-snug break-words">FIAT</span>
+          <button type="button" data-index="0" class="option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150">
+            <span class="opt-letter text-[14px] font-bold text-[#333333] leading-tight mb-[4px]">A</span>
+            <span class="opt-label text-[14px] font-medium text-[#333333] uppercase leading-[1.2] break-words">FIAT</span>
           </button>
 
           <!-- Карточка B -->
-          <button type="button" data-index="1" class="option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]">
-            <span class="opt-letter text-[14px] font-bold text-[#262626] leading-tight mb-1">B</span>
-            <span class="opt-label text-[14px] font-semibold text-[#333333] uppercase leading-snug break-words">AUDI</span>
+          <button type="button" data-index="1" class="option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150">
+            <span class="opt-letter text-[14px] font-bold text-[#333333] leading-tight mb-[4px]">B</span>
+            <span class="opt-label text-[14px] font-medium text-[#333333] uppercase leading-[1.2] break-words">AUDI</span>
           </button>
 
           <!-- Карточка C -->
-          <button type="button" data-index="2" class="option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]">
-            <span class="opt-letter text-[14px] font-bold text-[#262626] leading-tight mb-1">C</span>
-            <span class="opt-label text-[14px] font-semibold text-[#333333] uppercase leading-snug break-words">RENAULT</span>
+          <button type="button" data-index="2" class="option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150">
+            <span class="opt-letter text-[14px] font-bold text-[#333333] leading-tight mb-[4px]">C</span>
+            <span class="opt-label text-[14px] font-medium text-[#333333] uppercase leading-[1.2] break-words">RENAULT</span>
           </button>
 
           <!-- Карточка D -->
-          <button type="button" data-index="3" class="option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]">
-            <span class="opt-letter text-[14px] font-bold text-[#262626] leading-tight mb-1">D</span>
-            <span class="opt-label text-[14px] font-semibold text-[#333333] uppercase leading-snug break-words">PEUGEOT</span>
+          <button type="button" data-index="3" class="option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150">
+            <span class="opt-letter text-[14px] font-bold text-[#333333] leading-tight mb-[4px]">D</span>
+            <span class="opt-label text-[14px] font-medium text-[#333333] uppercase leading-[1.2] break-words">PEUGEOT</span>
           </button>
         </div>
 
-        <!-- Подсказка / статус ответа -->
-        <div id="feedback-bar" class="min-h-[22px] mt-2 mb-2 text-center text-[12px] font-semibold text-stone-500 transition-opacity duration-200">
-          Выберите вариант ответа и нажмите «Ответить»
-        </div>
-
-        <!-- Кнопка ОТВЕТИТЬ -->
+        <!-- Кнопка ОТВЕТИТЬ (высота 45px, отступ сверху 21px, отступ снизу 20px задан padding карточки) -->
         <button id="submit-btn" type="button"
-          class="w-full py-3.5 rounded-[10px] bg-[#F18121] hover:bg-[#e07012] active:scale-[0.99] text-white font-bold text-[14px] uppercase tracking-wider shadow-[0_4px_14px_rgba(241,129,33,0.38)] transition">
+          class="w-full h-[45px] mt-[21px] shrink-0 rounded-[8px] bg-[#F18121] hover:bg-[#e07012] active:scale-[0.99] text-white font-bold text-[14px] uppercase tracking-wide flex items-center justify-center transition">
           ОТВЕТИТЬ
         </button>
       </section>
 
       <!-- ЭКРАН РЕЗУЛЬТАТОВ (ПОСЛЕ 10 ВОПРОСА И ОТЪЕЗДА АВТОМОБИЛЯ ЗА КАДР) -->
-      <section id="result-card" class="hidden bg-white rounded-[22px] px-5 pt-5 pb-5 shadow-[0_14px_40px_rgba(0,0,0,0.28)] flex-col justify-between min-h-[455px] sm:min-h-[470px] transition-all duration-300">
+      <section id="result-card" class="hidden bg-white rounded-[18px] px-5 pt-5 pb-5 shadow-[0_10px_30px_rgba(0,0,0,0.2)] flex-col justify-between h-full transition-all duration-300">
         <div>
           <div class="w-full h-[3.5px] bg-[#10B981] rounded-full overflow-hidden mb-4"></div>
 
-          <div class="flex items-center justify-between mb-2">
-            <span class="px-2.5 py-1 rounded-full bg-orange-100 text-[#F18121] text-[11px] font-bold uppercase tracking-wider">
-              Ночной финиш • 300 км/ч
-            </span>
-            <span id="car-status-badge" class="text-[11px] font-semibold text-stone-500">
-              🏁 Авто уехало за кадр
-            </span>
-          </div>
+
 
           <h2 class="font-question text-[26px] font-bold text-[#262626] uppercase mb-1">
             ЗАЕЗД ЗАВЕРШЕН!
@@ -637,8 +612,8 @@
             Отличный результат! Вы отлично разбираетесь в автомобилях.
           </p>
 
-          <!-- Сводка очков и скорости -->
-          <div class="grid grid-cols-3 gap-2.5 mb-4">
+          <!-- Сводка очков -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="rounded-xl bg-stone-100 p-3 text-center">
               <div class="text-[11px] font-semibold text-stone-500 uppercase">Счёт</div>
               <div id="final-score-val" class="text-[20px] font-extrabold text-[#262626]">10 / 10</div>
@@ -646,10 +621,6 @@
             <div class="rounded-xl bg-stone-100 p-3 text-center">
               <div class="text-[11px] font-semibold text-stone-500 uppercase">Точность</div>
               <div id="final-accuracy-val" class="text-[20px] font-extrabold text-[#F18121]">100%</div>
-            </div>
-            <div class="rounded-xl bg-stone-100 p-3 text-center">
-              <div class="text-[11px] font-semibold text-stone-500 uppercase">Макс. скор.</div>
-              <div class="text-[20px] font-extrabold text-emerald-600">300</div>
             </div>
           </div>
 
@@ -720,7 +691,7 @@
             <div class="font-bold text-stone-900 text-xs mb-1.5">Режим времени суток</div>
             <div class="grid grid-cols-3 gap-2">
               <button type="button" data-lightmode="auto" class="lightmode-btn py-2 rounded-lg text-xs font-bold border-2 border-[#F18121] bg-orange-50 text-[#F18121]">
-                Авто (10 раунд)
+                Авто
               </button>
               <button type="button" data-lightmode="day" class="lightmode-btn py-2 rounded-lg text-xs font-bold border border-stone-200 text-stone-600">
                 День
@@ -768,78 +739,64 @@
                 Копировать YAML
               </button>
             </div>
-            <pre id="workflow-code-block" class="p-2.5 rounded-xl bg-stone-900 text-emerald-300 font-mono text-[10px] leading-relaxed overflow-x-auto max-h-[210px] custom-scroll select-all">name: Build Mobile Auto Quiz (Android APK &amp; GitHub Pages)
+            <pre id="workflow-code-block" class="p-2.5 rounded-xl bg-stone-900 text-emerald-300 font-mono text-[10px] leading-relaxed overflow-x-auto max-h-[210px] custom-scroll select-all">name: Build Mobile Auto Quiz APK
 
 on:
   push:
-    branches: [ main, master ]
-    tags: [ 'v*' ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "**" ]
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  build-android-and-web:
+  build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Setup Java 21 (Temurin)
+      - name: Setup Java 17 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Capacitor &amp; Generate Android Project
+      - name: Prepare Capacitor &amp; Build APK
         run: |
-          npm install
-          if [ ! -d "android" ]; then
-            npx cap add android
+          mkdir -p www
+          if [ ! -f "www/index.html" ] &amp;&amp; [ -f "index.html" ]; then
+            cp index.html www/index.html
           fi
+          rm -rf node_modules package-lock.json android
+          npm init -y
+          npm install @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
+          cat &lt;&lt; 'EOF' &gt; capacitor.config.json
+          {
+            "appId": "com.retroauto.quiz",
+            "appName": "AutoQuiz",
+            "webDir": "www"
+          }
+          EOF
+          npx cap add android
           npx cap sync android
-
-      - name: Build Debug APK via Gradle
-        working-directory: ./android
-        run: |
+          cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: auto-quiz-android-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./www
-
-  deploy-pages:
-    needs: build-android-and-web
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4</pre>
+          path: android/app/build/outputs/apk/debug/app-debug.apk</pre>
           </div>
         </div>
 
@@ -993,21 +950,16 @@ jobs:
       const muteBtn = document.getElementById('mute-btn');
       const iconSoundOff = document.getElementById('icon-sound-off');
       const iconSoundOn = document.getElementById('icon-sound-on');
-      const modeIndicatorIcon = document.getElementById('mode-indicator-icon');
-      const speedIndicatorText = document.getElementById('speed-indicator-text');
       const backBtn = document.getElementById('back-btn');
       const questionCounter = document.getElementById('question-counter');
-      const departureBanner = document.getElementById('departure-banner');
 
       const quizCard = document.getElementById('quiz-card');
       const progressBar = document.getElementById('progress-bar');
       const questionText = document.getElementById('question-text');
       const optionBtns = Array.from(document.querySelectorAll('.option-btn'));
-      const feedbackBar = document.getElementById('feedback-bar');
       const submitBtn = document.getElementById('submit-btn');
 
       const resultCard = document.getElementById('result-card');
-      const carStatusBadge = document.getElementById('car-status-badge');
       const resultRankText = document.getElementById('result-rank-text');
       const finalScoreVal = document.getElementById('final-score-val');
       const finalAccuracyVal = document.getElementById('final-accuracy-val');
@@ -1303,20 +1255,12 @@ jobs:
         safeSetAttr(roadNightLighting, 'opacity', nightVal);
         safeSetAttr(carNightEffects, 'opacity', nightVal);
 
-        if (modeIndicatorIcon) {
-          modeIndicatorIcon.textContent = shouldBeNight ? '🌙' : '☀️';
-        }
+
       }
 
       // ==================== УПРАВЛЕНИЕ МАНЕВРОМ ВЫЕЗДА АВТОМОБИЛЯ ЗА КАДР ====================
       function syncCarStatusUI() {
-        if (carStatusBadge) {
-          if (state.driveMode === 'departing' || state.driveMode === 'away') {
-            carStatusBadge.textContent = '🏁 Авто уехало за кадр';
-          } else {
-            carStatusBadge.textContent = '🚗 Авто снова в кадре';
-          }
-        }
+
         if (toggleCarReturnBtn) {
           if (state.driveMode === 'departing' || state.driveMode === 'away') {
             toggleCarReturnBtn.textContent = '↩ Вернуть авто в кадр';
@@ -1425,13 +1369,7 @@ jobs:
 
         updateOptionStyles();
 
-        if (qIndex === QUESTIONS.length - 1) {
-          feedbackBar.textContent = '🌙 Ночной финальный раунд (300 км/ч)! Выберите ответ';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-bold text-amber-600 transition-opacity duration-200';
-        } else {
-          feedbackBar.textContent = 'Скорость: ' + qObj.speedKmh + ' км/ч • Выберите вариант ответа';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-semibold text-stone-500 transition-opacity duration-200';
-        }
+
 
         submitBtn.textContent = 'ОТВЕТИТЬ';
         submitBtn.disabled = false;
@@ -1444,19 +1382,17 @@ jobs:
 
           if (!state.isAnswered) {
             if (isSelected) {
-              // Точно как карточка B AUDI в 51.png: оранжевая рамка 2px
-              btn.className = 'option-btn group text-left rounded-[12px] border-2 border-[#F18121] bg-orange-50/20 p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 shadow-[0_4px_12px_rgba(241,129,33,0.12)]';
+              btn.className = 'option-btn group text-left rounded-[8px] border-[1.5px] border-[#F18121] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150';
             } else {
-              btn.className = 'option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]';
+              btn.className = 'option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150 hover:border-[#F18121]/60 active:scale-[0.98]';
             }
           } else {
-            // После нажатия ОТВЕТИТЬ показываем правильный/неправильный вариант
             if (idx === qObj.correct) {
-              btn.className = 'option-btn group text-left rounded-[12px] border-2 border-emerald-500 bg-emerald-50/70 p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150';
+              btn.className = 'option-btn group text-left rounded-[8px] border-[1.5px] border-emerald-500 bg-emerald-50/60 p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150';
             } else if (isSelected && idx !== qObj.correct) {
-              btn.className = 'option-btn group text-left rounded-[12px] border-2 border-rose-500 bg-rose-50/70 p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150';
+              btn.className = 'option-btn group text-left rounded-[8px] border-[1.5px] border-rose-500 bg-rose-50/60 p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150';
             } else {
-              btn.className = 'option-btn group text-left rounded-[12px] border-[1.5px] border-[#E2E2E2] bg-white opacity-55 p-3.5 h-[112px] sm:h-[118px] flex flex-col justify-start transition-all duration-150';
+              btn.className = 'option-btn group text-left rounded-[8px] border-[1.5px] border-[#E5E5E5] bg-white opacity-55 p-[12px] h-full min-h-[70px] flex flex-col justify-start transition-all duration-150';
             }
           }
         });
@@ -1488,8 +1424,8 @@ jobs:
           quizCard.classList.remove('shake-anim');
           void quizCard.offsetWidth;
           quizCard.classList.add('shake-anim');
-          feedbackBar.textContent = 'Пожалуйста, выберите один из 4 вариантов (A, B, C или D)';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-bold text-rose-600 transition-opacity duration-200';
+          
+          
           playUiSound('wrong');
           return;
         }
@@ -1504,13 +1440,13 @@ jobs:
 
         if (isCorrect) {
           playUiSound('correct');
-          feedbackBar.textContent = '✓ Верно! Автомобиль набирает обороты...';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-bold text-emerald-600 transition-opacity duration-200';
+          
+          
         } else {
           playUiSound('wrong');
-          const letters = ['A', 'B', 'C', 'D'];
-          feedbackBar.textContent = '✕ Неверно. Правильный ответ: ' + letters[qObj.correct] + ' (' + qObj.options[qObj.correct] + ')';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-bold text-rose-600 transition-opacity duration-200';
+
+          
+          
         }
 
         // Сразу прибавляем скорость к следующему раунду, чтобы игрок ощутил разгон
@@ -1547,9 +1483,7 @@ jobs:
         // Автомобиль резко уезжает за кадр после ответа на все 10 вопросов!
         departCarOffscreen();
 
-        if (departureBanner) {
-          departureBanner.classList.remove('hidden');
-        }
+
 
         // Показываем карточку результатов
         quizCard.classList.add('hidden');
@@ -1586,7 +1520,7 @@ jobs:
         if (correctCount >= 9) {
           resultRankText.textContent = '🏆 Легенда автоспорта! Безупречное знание автомобильного мира.';
         } else if (correctCount >= 7) {
-          resultRankText.textContent = '🔥 Опытный пилот! Отличный результат на скорости 300 км/ч.';
+          resultRankText.textContent = '🔥 Опытный пилот! Отличный результат.';
         } else if (correctCount >= 4) {
           resultRankText.textContent = '👍 Уверенный водитель! Хорошая база, но можно разогнаться еще быстрее.';
         } else {
@@ -1606,9 +1540,7 @@ jobs:
         state.quizCompleted = false;
         state.targetSpeedKmh = QUESTIONS[0].speedKmh;
 
-        if (departureBanner) {
-          departureBanner.classList.add('hidden');
-        }
+
 
         // Возвращаем автомобиль в кадр, если он был за пределами экрана
         if (state.driveMode === 'away' || state.driveMode === 'departing') {
@@ -1639,8 +1571,8 @@ jobs:
           state.selectedOption = null;
           state.isAnswered = false;
           updateOptionStyles();
-          feedbackBar.textContent = 'Вы на первом вопросе (60 км/ч). Выберите вариант ответа';
-          feedbackBar.className = 'min-h-[22px] mt-2 mb-2 text-center text-[12px] font-semibold text-stone-500 transition-opacity duration-200';
+          
+          
         }
       }
 
@@ -1786,9 +1718,7 @@ jobs:
 
           // Плавный разгон/торможение до целевой скорости текущего вопроса
           state.speedKmh += (state.targetSpeedKmh - state.speedKmh) * Math.min(1, dt * 3.8);
-          if (speedIndicatorText) {
-            speedIndicatorText.textContent = Math.round(state.speedKmh) + ' КМ/Ч';
-          }
+
 
           // Обновляем маневр выезда за кадр / возврата
           updateCarManeuver(dt);
