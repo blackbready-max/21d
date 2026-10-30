@@ -40,9 +40,10 @@
       line-height: 1.08;
     }
 
-    /* Аппаратное ускорение для плавных 60 FPS */
-    .gpu-layer {
-      will-change: transform;
+    /* Единый плоский композитный слой для SVG без переаллокации тайлов в Android WebView */
+    #scene-canvas {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
@@ -102,405 +103,7 @@
 
     <!-- ==================== ФОНОВАЯ АНИМИРОВАННАЯ SVG-СЦЕНА С МАСЛКАРОМ ==================== -->
     <div class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-      <svg id="scene-svg" class="w-full h-auto block" viewBox="0 0 1000 2400" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <!-- Мягкий ореол вокруг луны -->
-          <radialGradient id="moon-halo-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#D6EEF8" stop-opacity="0.32" />
-            <stop offset="45%" stop-color="#B8D8E8" stop-opacity="0.14" />
-            <stop offset="100%" stop-color="#B8D8E8" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Многоступенчатый золотистый ореол вокруг линз передних фар -->
-          <radialGradient id="headlight-halo-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#FFFDF2" stop-opacity="0.95" />
-            <stop offset="28%" stop-color="#FFE89E" stop-opacity="0.75" />
-            <stop offset="60%" stop-color="#FFAE38" stop-opacity="0.32" />
-            <stop offset="100%" stop-color="#FF9419" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Яркое раскаленное ядро линзы фары -->
-          <radialGradient id="headlight-core-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
-            <stop offset="55%" stop-color="#FFF5C8" stop-opacity="0.92" />
-            <stop offset="85%" stop-color="#FFCA57" stop-opacity="0.45" />
-            <stop offset="100%" stop-color="#FFCA57" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Мягкая частица дорожной пыли -->
-          <radialGradient id="dust-puff-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#E5C89B" stop-opacity="0.85" />
-            <stop offset="55%" stop-color="#DEC092" stop-opacity="0.4" />
-            <stop offset="100%" stop-color="#DEC092" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Градиент ночного неба -->
-          <linearGradient id="night-sky-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#040A11" />
-            <stop offset="55%" stop-color="#0A1724" />
-            <stop offset="100%" stop-color="#102530" />
-          </linearGradient>
-
-          <!-- Градиент дальнего конуса правой (дальней) фары -->
-          <linearGradient id="headlight-beam-far" x1="160" y1="552" x2="-240" y2="715" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#FFF9DF" stop-opacity="0.68" />
-            <stop offset="28%" stop-color="#FFE49E" stop-opacity="0.36" />
-            <stop offset="70%" stop-color="#F6C86E" stop-opacity="0.12" />
-            <stop offset="100%" stop-color="#F6C86E" stop-opacity="0" />
-          </linearGradient>
-
-          <!-- Градиент ближнего конуса левой (ближней) фары -->
-          <linearGradient id="headlight-beam-near" x1="398" y1="602" x2="-190" y2="855" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#FFFBEF" stop-opacity="0.78" />
-            <stop offset="25%" stop-color="#FFE7A8" stop-opacity="0.44" />
-            <stop offset="68%" stop-color="#F6C86E" stop-opacity="0.15" />
-            <stop offset="100%" stop-color="#F6C86E" stop-opacity="0" />
-          </linearGradient>
-
-          <!-- Радиальный градиент светового пятна на полотне дороги перед авто -->
-          <radialGradient id="road-light-pool" cx="35%" cy="42%" r="60%">
-            <stop offset="0%" stop-color="#FFF3C4" stop-opacity="0.52" />
-            <stop offset="50%" stop-color="#F5CA7B" stop-opacity="0.22" />
-            <stop offset="100%" stop-color="#F5CA7B" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Радиальный градиент отсвета заднего красного фонаря на земле позади кормы -->
-          <radialGradient id="taillight-glow-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#FF3B1F" stop-opacity="0.65" />
-            <stop offset="50%" stop-color="#E01E08" stop-opacity="0.24" />
-            <stop offset="100%" stop-color="#E01E08" stop-opacity="0" />
-          </radialGradient>
-
-          <!-- Градиент ночного затенения окружения -->
-          <linearGradient id="night-env-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#040B12" stop-opacity="0.72" />
-            <stop offset="35%" stop-color="#07131E" stop-opacity="0.68" />
-            <stop offset="100%" stop-color="#0A131C" stop-opacity="0.78" />
-          </linearGradient>
-
-          <!-- Маска травяного склона -->
-          <clipPath id="grass-bank-clip">
-            <polygon points="-400,603 1400,3 1400,159 -400,759" />
-          </clipPath>
-
-          <!-- Шаблоны деревьев -->
-          <g id="bg-pine-silhouette">
-            <polygon points="0,-390 -90,120 0,120" fill="#112620" />
-            <polygon points="0,-390 90,120 0,120" fill="#1B3830" />
-          </g>
-
-          <g id="tree-ground-shadow-lg">
-            <polygon points="-140,47 16,-5 22,5 -125,54" fill="#2A3927" opacity="0.65" />
-          </g>
-          <g id="tree-ground-shadow-md">
-            <polygon points="-105,35 14,-4 18,4 -92,41" fill="#2A3927" opacity="0.55" />
-          </g>
-          <g id="tree-ground-shadow-trunk">
-            <polygon points="-165,55 42,-14 46,6 -145,66" fill="#273624" opacity="0.7" />
-          </g>
-
-          <g id="tree-green-tall">
-            <polygon points="0,-495 -94,-42 0,-42" fill="#102822" />
-            <polygon points="0,-495 126,-42 0,-42" fill="#2A4B3C" />
-            <path d="M-13,2 L-9,-335 L4,-335 L13,2 Z" fill="#3B2316" />
-            <polygon points="-8,-202 -44,-246 -36,-253 -6,-218" fill="#3B2316" />
-            <polygon points="5,-138 50,-198 43,-204 2,-156" fill="#3B2316" />
-            <ellipse cx="0" cy="1" rx="18" ry="4.5" fill="#263624" />
-          </g>
-
-          <g id="tree-ochre-tall">
-            <polygon points="0,-425 -85,-52 0,-52" fill="#7A4924" />
-            <polygon points="0,-425 112,-52 0,-52" fill="#9E7856" />
-            <path d="M-12,2 L-5,-310 L4,-310 L12,2 Z" fill="#532814" />
-            <polygon points="-4,-152 -42,-200 -36,-206 -2,-168" fill="#532814" />
-            <polygon points="3,-204 36,-242 31,-248 2,-218" fill="#532814" />
-            <polygon points="5,-114 50,-166 43,-172 3,-130" fill="#532814" />
-            <ellipse cx="0" cy="1" rx="16" ry="4" fill="#263624" />
-          </g>
-
-          <g id="tree-pine-dark">
-            <polygon points="0,-405 -82,-46 0,-46" fill="#0E221D" />
-            <polygon points="0,-405 114,-46 0,-46" fill="#1C382F" />
-            <path d="M-12,2 L-10,-52 L10,-52 L12,2 Z" fill="#162B24" />
-            <ellipse cx="0" cy="1" rx="16" ry="4" fill="#243423" />
-          </g>
-
-          <g id="tree-thick-trunk">
-            <polygon points="-42,-680 42,-680 40,3 -42,3" fill="#602F17" />
-            <polygon points="4,-580 42,-640 42,-500 -2,-430 -2,-515" fill="#7A4421" />
-            <polygon points="42,-455 42,-350 -6,-280 -6,-360" fill="#7A4421" />
-            <polygon points="-4,-245 42,-315 40,2 -6,2" fill="#7A4421" />
-            <polygon points="36,-198 88,-262 81,-268 34,-222" fill="#68381B" />
-            <ellipse cx="-1" cy="2" rx="46" ry="7" fill="#263624" />
-          </g>
-
-          <g id="tree-ochre-med">
-            <polygon points="0,-335 -86,-44 0,-44" fill="#7A4924" />
-            <polygon points="0,-335 92,-44 0,-44" fill="#9E7856" />
-            <path d="M-10,2 L-4,-265 L4,-265 L10,2 Z" fill="#532814" />
-            <polygon points="-3,-140 -34,-170 -29,-176 -2,-152" fill="#532814" />
-            <polygon points="3,-180 34,-210 29,-216 2,-192" fill="#532814" />
-            <polygon points="4,-102 40,-140 34,-146 2,-116" fill="#532814" />
-            <ellipse cx="0" cy="1" rx="14" ry="3.5" fill="#263624" />
-          </g>
-
-          <g id="tree-pine-med">
-            <polygon points="0,-325 -76,-40 0,-40" fill="#10251F" />
-            <polygon points="0,-325 86,-40 0,-40" fill="#1E3C31" />
-            <path d="M-10,2 L-9,-46 L9,-46 L10,2 Z" fill="#132822" />
-            <ellipse cx="0" cy="1" rx="14" ry="3.5" fill="#243423" />
-          </g>
-
-          <!-- Слои бесшовного тайла (L = 1200px, dy = -400px, SLOPE = -1/3) -->
-          <g id="forest-far-tile">
-            <use href="#bg-pine-silhouette" transform="translate(40, 481.7) scale(1.05)" />
-            <use href="#bg-pine-silhouette" transform="translate(190, 431.7) scale(0.92)" />
-            <use href="#bg-pine-silhouette" transform="translate(340, 381.7) scale(1.12)" />
-            <use href="#bg-pine-silhouette" transform="translate(500, 328.3) scale(0.98)" />
-            <use href="#bg-pine-silhouette" transform="translate(650, 278.3) scale(1.08)" />
-            <use href="#bg-pine-silhouette" transform="translate(800, 228.3) scale(0.94)" />
-            <use href="#bg-pine-silhouette" transform="translate(950, 178.3) scale(1.10)" />
-            <use href="#bg-pine-silhouette" transform="translate(1100, 128.3) scale(0.96)" />
-          </g>
-
-          <g id="shadows-mid-tile">
-            <use href="#tree-ground-shadow-md" transform="translate(150, 478)" />
-            <use href="#tree-ground-shadow-lg" transform="translate(375, 403)" />
-            <use href="#tree-ground-shadow-md" transform="translate(690, 298)" />
-            <use href="#tree-ground-shadow-md" transform="translate(945, 213)" />
-            <use href="#tree-ground-shadow-lg" transform="translate(1125, 153)" />
-          </g>
-
-          <g id="shadows-front-tile">
-            <use href="#tree-ground-shadow-lg" transform="translate(84, 539)" />
-            <use href="#tree-ground-shadow-lg" transform="translate(231, 490)" />
-            <use href="#tree-ground-shadow-trunk" transform="translate(546, 385)" />
-            <use href="#tree-ground-shadow-md" transform="translate(816, 295)" />
-            <use href="#tree-ground-shadow-md" transform="translate(1035, 222)" />
-          </g>
-
-          <g id="forest-mid-tile">
-            <use href="#tree-pine-med" transform="translate(150, 478) scale(0.94)" />
-            <use href="#tree-pine-dark" transform="translate(375, 403)" />
-            <use href="#tree-pine-med" transform="translate(690, 298)" />
-            <use href="#tree-pine-med" transform="translate(945, 213) scale(0.92)" />
-            <use href="#tree-ochre-med" transform="translate(1125, 153) scale(0.95)" />
-          </g>
-
-          <g id="forest-front-tile">
-            <use href="#tree-ochre-med" transform="translate(1035, 222)" />
-            <use href="#tree-ochre-med" transform="translate(816, 295)" />
-            <use href="#tree-thick-trunk" transform="translate(546, 385)" />
-            <use href="#tree-ochre-tall" transform="translate(231, 490)" />
-            <use href="#tree-green-tall" transform="translate(84, 539)" />
-          </g>
-
-          <g id="grass-details-tile">
-            <polygon points="60,555 150,525 156,531 66,561" fill="#445433" opacity="0.7" />
-            <polygon points="310,455 415,420 420,426 315,461" fill="#445433" opacity="0.7" />
-            <polygon points="610,365 715,330 720,336 615,371" fill="#445433" opacity="0.7" />
-            <polygon points="870,272 960,242 965,248 875,278" fill="#445433" opacity="0.7" />
-          </g>
-
-          <g id="road-details-tile">
-            <g fill="#B98E57" opacity="0.58">
-              <polygon points="45,790 135,760 139,764 49,794" />
-              <polygon points="240,860 360,820 364,824 244,864" />
-              <polygon points="480,745 555,720 558,724 483,749" />
-              <polygon points="690,640 789,607 793,611 694,644" />
-              <polygon points="860,710 950,680 954,684 864,714" />
-              <polygon points="150,655 216,633 219,637 153,659" />
-              <polygon points="570,565 645,540 648,544 573,569" />
-              <polygon points="940,515 1030,485 1034,489 944,519" />
-              <polygon points="390,925 495,890 499,894 394,929" />
-              <polygon points="780,835 885,800 889,804 784,839" />
-            </g>
-            <g fill="#D8B27E" opacity="0.55">
-              <circle cx="110" cy="830" r="3" />
-              <circle cx="310" cy="755" r="2.5" />
-              <circle cx="520" cy="810" r="3.5" />
-              <circle cx="670" cy="710" r="2.8" />
-              <circle cx="840" cy="595" r="3" />
-              <circle cx="980" cy="630" r="3.2" />
-              <circle cx="210" cy="910" r="3" />
-              <circle cx="630" cy="885" r="2.8" />
-            </g>
-          </g>
-        </defs>
-
-        <!-- 1. НЕБО И ДАЛЬНИЙ ЛЕС -->
-        <rect x="-200" y="0" width="1500" height="2500" fill="#18352D" />
-
-        <!-- Ночное небо со звездами и полумесяцем (включается на 10 вопросе) -->
-        <g id="night-sky-layer" opacity="0" style="transition: opacity 0.6s ease;">
-          <rect x="-200" y="0" width="1500" height="700" fill="url(#night-sky-grad)" />
-          <circle cx="155" cy="115" r="76" fill="url(#moon-halo-grad)" />
-          <path d="M 145,86 A 28,28 0 1,0 174,132 A 23,23 0 1,1 145,86 Z" fill="#EBF6FA" opacity="0.9" />
-          <g id="night-stars" fill="#E8F4F8">
-            <circle cx="125" cy="165" r="1.8" opacity="0.8" />
-            <circle cx="285" cy="158" r="2.1" opacity="0.9" />
-            <circle cx="360" cy="210" r="1.5" opacity="0.7" />
-            <circle cx="465" cy="170" r="1.9" opacity="0.85" />
-            <circle cx="620" cy="152" r="1.7" opacity="0.75" />
-            <circle cx="715" cy="192" r="2.2" opacity="0.95" />
-            <circle cx="840" cy="164" r="1.6" opacity="0.7" />
-            <circle cx="910" cy="182" r="1.9" opacity="0.8" />
-            <circle cx="395" cy="258" r="1.5" opacity="0.65" />
-            <circle cx="585" cy="228" r="1.7" opacity="0.7" />
-            <circle cx="155" cy="295" r="1.5" opacity="0.6" />
-          </g>
-        </g>
-
-        <!-- Дальний параллакс-слой леса -->
-        <g id="parallax-far" class="gpu-layer"></g>
-
-        <!-- 2. ТРАВЯНОЙ СКЛОН И СЛОИ ЛЕСА -->
-        <polygon points="-400,603 1400,3 1400,200 -400,800" fill="#51603C" />
-        <polygon points="-400,603 1400,3 1400,38 -400,638" fill="#465534" />
-
-        <g id="parallax-grass" class="gpu-layer"></g>
-
-        <g clip-path="url(#grass-bank-clip)">
-          <g id="parallax-shadows-mid" class="gpu-layer"></g>
-          <g id="parallax-shadows-front" class="gpu-layer"></g>
-        </g>
-
-        <g id="parallax-mid" class="gpu-layer"></g>
-        <g id="parallax-front" class="gpu-layer"></g>
-
-        <!-- 3. ДОРОГА (продлена вниз до y=2200 для мобильных экранов любой высоты) -->
-        <polygon points="-200,692.7 1200,226 1200,2500 -200,2500" fill="#CCA36E" />
-        <polygon points="-200,692.7 1200,226 1200,232 -200,698.7" fill="#B68D58" opacity="0.65" />
-
-        <g id="parallax-road" class="gpu-layer"></g>
-        <g id="dust-layer"></g>
-
-        <!-- Ночное затенение окружения -->
-        <rect id="evening-overlay" x="-200" y="0" width="1500" height="2500" fill="url(#night-env-grad)" opacity="0" pointer-events="none" style="transition: opacity 0.6s ease;" />
-
-        <!-- 4. АВТОМОБИЛЬ -->
-        <g id="car-master" class="gpu-layer">
-          <g id="road-night-lighting" opacity="0" pointer-events="none" style="transition: opacity 0.6s ease;">
-            <ellipse cx="45" cy="742" rx="340" ry="105" transform="rotate(-18.43 45 742)" fill="url(#road-light-pool)" />
-            <ellipse cx="918" cy="488" rx="78" ry="29" transform="rotate(-18.43 918 488)" fill="url(#taillight-glow-grad)" />
-          </g>
-
-          <path id="car-shadow"
-            d="M 59,683 L 208,628 L 855,498 L 913,511 L 815,557 L 504,703 Q 352,739 332,736 L 59,683 Z"
-            fill="#3D2417" />
-
-          <g id="car-underbody">
-            <path d="M 185,608 L 485,668 L 825,518 L 865,478 L 450,555 Z" fill="#351A0F" />
-            <path d="M 448,664 C 444,580 478,546 534,548 C 570,550 580,590 568,628 Z" fill="#2E150B" />
-            <path d="M 768,534 C 768,468 795,435 837,438 C 865,440 872,474 862,505 Z" fill="#2E150B" />
-          </g>
-
-          <g id="wheel-front-right">
-            <path d="M 200,628 Q 232,653 270,644 L 272,622 L 198,612 Z" fill="#3B1E12" />
-          </g>
-
-          <g id="wheel-rear">
-            <path d="M 792,452 L 824,448 L 808,557 L 774,544 C 762,515 768,472 792,452 Z" fill="#3B1E12" />
-            <g transform="translate(820, 503) rotate(12)">
-              <ellipse cx="0" cy="0" rx="33" ry="53" fill="#4B2515" />
-              <ellipse cx="4" cy="1" rx="20" ry="37" fill="#E5C48B" />
-              <ellipse cx="-1" cy="0" rx="16" ry="31" fill="#8A623A" />
-              <g transform="scale(0.52, 1)">
-                <g id="rear-wheel-spinner">
-                  <line x1="-26" y1="0" x2="26" y2="0" stroke="#6E4A26" stroke-width="5" />
-                  <line x1="0" y1="-26" x2="0" y2="26" stroke="#6E4A26" stroke-width="5" />
-                  <line x1="-18" y1="-18" x2="18" y2="18" stroke="#A67B4E" stroke-width="3.5" />
-                  <line x1="-18" y1="18" x2="18" y2="-18" stroke="#5A391E" stroke-width="3.5" />
-                </g>
-                <g id="rear-wheel-blur" opacity="0">
-                  <circle cx="0" cy="0" r="20" fill="none" stroke="#B88E5A" stroke-width="4" stroke-dasharray="28 14" />
-                  <circle cx="0" cy="0" r="12" fill="none" stroke="#6E4A26" stroke-width="3.5" stroke-dasharray="16 10" />
-                </g>
-              </g>
-              <ellipse cx="0" cy="0" rx="5.5" ry="10" fill="#5A391E" />
-              <ellipse cx="1" cy="0" rx="2.5" ry="4.5" fill="#D5B88B" />
-            </g>
-          </g>
-
-          <g id="wheel-front">
-            <path d="M 482,570 L 522,566 L 502,703 L 456,685 C 440,645 452,592 482,570 Z" fill="#3B1E12" />
-            <g transform="translate(512, 635) rotate(12)">
-              <ellipse cx="0" cy="0" rx="43" ry="67" fill="#4B2515" />
-              <ellipse cx="5" cy="2" rx="26" ry="45" fill="#E5C48B" />
-              <ellipse cx="-2" cy="0" rx="21" ry="38" fill="#8A623A" />
-              <g transform="scale(0.55, 1)">
-                <g id="front-wheel-spinner">
-                  <line x1="-32" y1="0" x2="32" y2="0" stroke="#6E4A26" stroke-width="6" />
-                  <line x1="0" y1="-32" x2="0" y2="32" stroke="#6E4A26" stroke-width="6" />
-                  <line x1="-22" y1="-22" x2="22" y2="22" stroke="#A67B4E" stroke-width="4" />
-                  <line x1="-22" y1="22" x2="22" y2="-22" stroke="#5A391E" stroke-width="4" />
-                </g>
-                <g id="front-wheel-blur" opacity="0">
-                  <circle cx="0" cy="0" r="25" fill="none" stroke="#B88E5A" stroke-width="5" stroke-dasharray="34 16" />
-                  <circle cx="0" cy="0" r="15" fill="none" stroke="#6E4A26" stroke-width="4" stroke-dasharray="20 12" />
-                </g>
-              </g>
-              <ellipse cx="0" cy="0" rx="7" ry="13" fill="#5A391E" />
-              <ellipse cx="1.5" cy="0" rx="3.2" ry="6" fill="#E5C48B" />
-            </g>
-          </g>
-
-          <g id="car-body">
-            <path d="M 135,526 L 405,574 L 909,401 C 914,418 902,452 885,472 L 858,492 C 862,458 848,438 824,440 C 796,442 778,472 774,528 L 564,616 C 568,574 552,552 522,554 C 486,556 462,592 454,666 C 425,672 392,670 355,660 L 164,612 C 145,595 138,560 135,526 Z" fill="#C85E18" />
-            <path d="M 135,526 C 148,512 195,494 362,435 L 432,353 C 510,316 615,314 736,332 C 762,337 785,352 805,368 L 882,379 L 898,372 L 909,402 L 412,576 L 135,526 Z" fill="#F18121" />
-            <polygon points="366,435 452,450 242,554 172,536" fill="#C6601A" />
-            <polygon points="546,480 336,566 368,570 546,480" fill="#BA5516" />
-            <polygon points="752,462 778,452 767,516 749,520" fill="#A84912" />
-            <polygon points="434,356 626,381 596,474 363,436" fill="#5E2715" />
-            <polygon points="434,356 508,366 495,405 378,435" fill="#7A6832" />
-            <polygon points="508,366 525,368 505,408 495,405" fill="#4E2514" />
-            <polygon points="522,371 544,373 516,396" fill="#6E6032" />
-            <polygon points="613,468 640,387 645,456" fill="#5E2715" />
-            <polygon points="647,384 725,358 735,420 652,453" fill="#5E2715" />
-            <polygon points="733,358 780,403 742,417" fill="#5E2715" />
-            <polygon points="640,386 646,384 652,453 645,456" fill="#D5B88B" />
-            <polygon points="725,358 732,358 742,417 735,420" fill="#D5B88B" />
-            <path d="M 135,526 L 415,576 L 424,634 L 144,574 Z" fill="#85481B" />
-            <ellipse cx="400" cy="601" rx="21" ry="22" transform="rotate(-10 400 601)" fill="#6B3714" />
-            <path d="M 176,540 L 334,580 C 344,583 350,606 346,615 L 182,575 C 175,565 173,548 176,540 Z" fill="#351B0F" />
-            <ellipse id="headlight-left" cx="159" cy="553" rx="10.5" ry="17" transform="rotate(-16 159 553)" fill="#F4D399" />
-            <ellipse id="headlight-right" cx="400" cy="601" rx="15.5" ry="18.5" transform="rotate(-10 400 601)" fill="#F5D59B" />
-            <path d="M 136,568 Q 255,612 396,634 L 446,624 C 452,626 452,636 445,640 L 394,648 Q 250,624 136,584 Z" fill="#9B7753" />
-            <path d="M 136,568 Q 255,612 396,634 L 446,624 L 445,630 L 395,639 Q 253,616 136,574 Z" fill="#B08960" />
-
-            <!-- Ночной режим кузова и фар -->
-            <g id="car-night-effects" opacity="0" pointer-events="none" style="transition: opacity 0.6s ease;">
-              <path d="M 135,526 C 148,512 195,494 362,435 L 432,353 C 510,316 615,314 736,332 C 762,337 785,352 805,368 L 882,379 L 898,372 L 909,402 C 914,418 902,452 885,472 L 858,492 C 862,458 848,438 824,440 C 796,442 778,472 774,528 L 564,616 C 568,574 552,552 522,554 C 486,556 462,592 454,666 C 425,672 392,670 355,660 L 164,612 C 145,595 138,560 135,526 Z" fill="#07131E" opacity="0.52" />
-              <ellipse cx="160" cy="553" rx="16" ry="22" transform="rotate(-16 160 553)" fill="#FFAE42" opacity="0.55" />
-              <ellipse cx="400" cy="601" rx="23" ry="25" transform="rotate(-10 400 601)" fill="#FFAE42" opacity="0.55" />
-              <path d="M 136,568 Q 255,612 396,634 L 446,624 L 445,629 L 395,638 Q 253,615 136,573 Z" fill="#FFE39F" opacity="0.75" />
-
-              <g id="headlight-beams">
-                <polygon points="156,536 -260,625 -260,795 156,570" fill="url(#headlight-beam-far)" opacity="0.55" />
-                <polygon points="158,543 -260,652 -260,752 158,563" fill="url(#headlight-beam-far)" opacity="0.85" />
-                <polygon points="396,583 -260,735 -105,975 390,620" fill="url(#headlight-beam-near)" opacity="0.55" />
-                <polygon points="398,591 -260,765 -150,925 392,613" fill="url(#headlight-beam-near)" opacity="0.88" />
-              </g>
-
-              <g>
-                <ellipse cx="159" cy="553" rx="34" ry="44" transform="rotate(-16 159 553)" fill="url(#headlight-halo-grad)" />
-                <ellipse cx="159" cy="553" rx="16" ry="24" transform="rotate(-16 159 553)" fill="url(#headlight-core-grad)" />
-                <ellipse cx="159" cy="553" rx="7.5" ry="12.5" transform="rotate(-16 159 553)" fill="#FFFFFF" />
-                <polygon points="122,561 159,550 196,545 159,556" fill="#FFFFFF" opacity="0.9" />
-                <polygon points="154,522 161,553 164,584 157,553" fill="#FFF7D6" opacity="0.75" />
-              </g>
-
-              <g>
-                <ellipse cx="400" cy="601" rx="48" ry="54" transform="rotate(-10 400 601)" fill="url(#headlight-halo-grad)" />
-                <ellipse cx="400" cy="601" rx="22" ry="26" transform="rotate(-10 400 601)" fill="url(#headlight-core-grad)" />
-                <ellipse cx="400" cy="601" rx="11" ry="13.5" transform="rotate(-10 400 601)" fill="#FFFFFF" />
-                <polygon points="350,612 400,597 450,590 400,605" fill="#FFFFFF" opacity="0.95" />
-                <polygon points="394,562 403,601 406,640 397,601" fill="#FFF7D6" opacity="0.8" />
-              </g>
-            </g>
-          </g>
-        </g>
-      </svg>
+      <canvas id="scene-canvas" width="720" height="1560" class="w-full h-auto block"></canvas>
     </div>
 
     <!-- ==================== ВЕРХНЯЯ ПАНЕЛЬ (ТОЧНО КАК НА СКРИНШОТЕ 51.PNG) ==================== -->
@@ -918,32 +521,8 @@ jobs:
 
       // ==================== DOM-ЭЛЕМЕНТЫ ====================
       const appShell = document.getElementById('app-shell');
-      const parallaxFar = document.getElementById('parallax-far');
-      const parallaxMid = document.getElementById('parallax-mid');
-      const parallaxFront = document.getElementById('parallax-front');
-      const parallaxShadowsMid = document.getElementById('parallax-shadows-mid');
-      const parallaxShadowsFront = document.getElementById('parallax-shadows-front');
-      const parallaxGrass = document.getElementById('parallax-grass');
-      const parallaxRoad = document.getElementById('parallax-road');
-      const dustLayer = document.getElementById('dust-layer');
-
-      const carMaster = document.getElementById('car-master');
-      const carBody = document.getElementById('car-body');
-      const carUnderbody = document.getElementById('car-underbody');
-      const carShadow = document.getElementById('car-shadow');
-      const wheelFront = document.getElementById('wheel-front');
-      const wheelRear = document.getElementById('wheel-rear');
-      const wheelFrontRight = document.getElementById('wheel-front-right');
-      const frontSpinner = document.getElementById('front-wheel-spinner');
-      const rearSpinner = document.getElementById('rear-wheel-spinner');
-      const frontWheelBlur = document.getElementById('front-wheel-blur');
-      const rearWheelBlur = document.getElementById('rear-wheel-blur');
-      const nightStars = document.getElementById('night-stars');
-
-      const nightSkyLayer = document.getElementById('night-sky-layer');
-      const eveningOverlay = document.getElementById('evening-overlay');
-      const roadNightLighting = document.getElementById('road-night-lighting');
-      const carNightEffects = document.getElementById('car-night-effects');
+      const sceneCanvas = document.getElementById('scene-canvas');
+      const ctx = sceneCanvas ? sceneCanvas.getContext('2d', { alpha: false }) : null;
 
       // Элементы интерфейса викторины
       const settingsBtn = document.getElementById('settings-btn');
@@ -985,65 +564,329 @@ jobs:
       const copyWorkflowBtn = document.getElementById('copy-workflow-btn');
       const workflowCodeBlock = document.getElementById('workflow-code-block');
 
-      function safeSetAttr(el, attr, val) {
-        if (el) el.setAttribute(attr, val);
-      }
-
-      // ==================== ИНИЦИАЛИЗАЦИЯ ПАРАЛЛАКС-СЛОЕВ И ПЫЛИ ====================
-      function setupParallaxLayer(container, templateId) {
-        if (!container) return null;
-        for (let i = -1; i <= 1; i++) {
-          const useEl = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-          useEl.setAttribute('href', '#' + templateId);
-          const tileX = i * LOOP_WIDTH;
-          const tileY = tileX * SLOPE;
-          useEl.setAttribute('transform', 'translate(' + tileX + ', ' + tileY + ')');
-          container.appendChild(useEl);
+      // ==================== ПРЕДКОМПИЛИРОВАННЫЙ 2D CANVAS РЕНДЕРЕР (0 МИГАНИЙ В ANDROID WEBVIEW) ====================
+      function polyPath(ptsStr) {
+        const nums = ptsStr.trim().split(/[\s,]+/);
+        let d = 'M ' + nums[0] + ' ' + nums[1];
+        for (let i = 2; i < nums.length; i += 2) {
+          d += ' L ' + nums[i] + ' ' + nums[i + 1];
         }
-        return container;
+        return new Path2D(d + ' Z');
       }
 
-      const farLayer = setupParallaxLayer(parallaxFar, 'forest-far-tile');
-      const shadowsMidLayer = setupParallaxLayer(parallaxShadowsMid, 'shadows-mid-tile');
-      const shadowsFrontLayer = setupParallaxLayer(parallaxShadowsFront, 'shadows-front-tile');
-      const midLayer = setupParallaxLayer(parallaxMid, 'forest-mid-tile');
-      const frontLayer = setupParallaxLayer(parallaxFront, 'forest-front-tile');
-      const grassLayer = setupParallaxLayer(parallaxGrass, 'grass-details-tile');
-      const roadLayer = setupParallaxLayer(parallaxRoad, 'road-details-tile');
+      const PATHS = {
+        moonCrescent: new Path2D('M 145,86 A 28,28 0 1,0 174,132 A 23,23 0 1,1 145,86 Z'),
+        grassSlopeMain: polyPath('-400,603 1400,3 1400,200 -400,800'),
+        grassSlopeTop: polyPath('-400,603 1400,3 1400,38 -400,638'),
+        grassBankClip: polyPath('-400,603 1400,3 1400,159 -400,759'),
+        roadMain: polyPath('-200,692.7 1200,226 1200,2200 -200,2200'),
+        roadEdge: polyPath('-200,692.7 1200,226 1200,232 -200,698.7'),
 
-      function updateLayerPosition(layerEl, offset) {
-        if (!layerEl) return;
-        const x = ((offset % LOOP_WIDTH) + LOOP_WIDTH) % LOOP_WIDTH;
-        const y = x * SLOPE;
-        layerEl.setAttribute('transform', 'translate(' + x.toFixed(2) + ', ' + y.toFixed(2) + ')');
+        bgPineL: polyPath('0,-390 -90,120 0,120'),
+        bgPineR: polyPath('0,-390 90,120 0,120'),
+
+        shadowLg: polyPath('-140,47 16,-5 22,5 -125,54'),
+        shadowMd: polyPath('-105,35 14,-4 18,4 -92,41'),
+        shadowTrunk: polyPath('-165,55 42,-14 46,6 -145,66'),
+
+        treeGreenTallL: polyPath('0,-495 -94,-42 0,-42'),
+        treeGreenTallR: polyPath('0,-495 126,-42 0,-42'),
+        treeGreenTallTrunk: new Path2D('M-13,2 L-9,-335 L4,-335 L13,2 Z'),
+        treeGreenTallBr1: polyPath('-8,-202 -44,-246 -36,-253 -6,-218'),
+        treeGreenTallBr2: polyPath('5,-138 50,-198 43,-204 2,-156'),
+
+        treeOchreTallL: polyPath('0,-425 -85,-52 0,-52'),
+        treeOchreTallR: polyPath('0,-425 112,-52 0,-52'),
+        treeOchreTallTrunk: new Path2D('M-12,2 L-5,-310 L4,-310 L12,2 Z'),
+        treeOchreTallBr1: polyPath('-4,-152 -42,-200 -36,-206 -2,-168'),
+        treeOchreTallBr2: polyPath('3,-204 36,-242 31,-248 2,-218'),
+        treeOchreTallBr3: polyPath('5,-114 50,-166 43,-172 3,-130'),
+
+        treePineDarkL: polyPath('0,-405 -82,-46 0,-46'),
+        treePineDarkR: polyPath('0,-405 114,-46 0,-46'),
+        treePineDarkTrunk: new Path2D('M-12,2 L-10,-52 L10,-52 L12,2 Z'),
+
+        thickTrunkMain: polyPath('-42,-680 42,-680 40,3 -42,3'),
+        thickTrunkH1: polyPath('4,-580 42,-640 42,-500 -2,-430 -2,-515'),
+        thickTrunkH2: polyPath('42,-455 42,-350 -6,-280 -6,-360'),
+        thickTrunkH3: polyPath('-4,-245 42,-315 40,2 -6,2'),
+        thickTrunkBr: polyPath('36,-198 88,-262 81,-268 34,-222'),
+
+        treeOchreMedL: polyPath('0,-335 -86,-44 0,-44'),
+        treeOchreMedR: polyPath('0,-335 92,-44 0,-44'),
+        treeOchreMedTrunk: new Path2D('M-10,2 L-4,-265 L4,-265 L10,2 Z'),
+        treeOchreMedBr1: polyPath('-3,-140 -34,-170 -29,-176 -2,-152'),
+        treeOchreMedBr2: polyPath('3,-180 34,-210 29,-216 2,-192'),
+        treeOchreMedBr3: polyPath('4,-102 40,-140 34,-146 2,-116'),
+
+        treePineMedL: polyPath('0,-325 -76,-40 0,-40'),
+        treePineMedR: polyPath('0,-325 86,-40 0,-40'),
+        treePineMedTrunk: new Path2D('M-10,2 L-9,-46 L9,-46 L10,2 Z'),
+
+        grassStrokes: [
+          polyPath('60,555 150,525 156,531 66,561'),
+          polyPath('310,455 415,420 420,426 315,461'),
+          polyPath('610,365 715,330 720,336 615,371'),
+          polyPath('870,272 960,242 965,248 875,278')
+        ],
+
+        roadStrokes: [
+          polyPath('45,790 135,760 139,764 49,794'),
+          polyPath('240,860 360,820 364,824 244,864'),
+          polyPath('480,745 555,720 558,724 483,749'),
+          polyPath('690,640 789,607 793,611 694,644'),
+          polyPath('860,710 950,680 954,684 864,714'),
+          polyPath('150,655 216,633 219,637 153,659'),
+          polyPath('570,565 645,540 648,544 573,569'),
+          polyPath('940,515 1030,485 1034,489 944,519'),
+          polyPath('390,925 495,890 499,894 394,929'),
+          polyPath('780,835 885,800 889,804 784,839')
+        ],
+
+        carShadow: new Path2D('M 59,683 L 208,628 L 855,498 L 913,511 L 815,557 L 504,703 Q 352,739 332,736 L 59,683 Z'),
+        underbodyMain: new Path2D('M 185,608 L 485,668 L 825,518 L 865,478 L 450,555 Z'),
+        underbodyArchF: new Path2D('M 448,664 C 444,580 478,546 534,548 C 570,550 580,590 568,628 Z'),
+        underbodyArchR: new Path2D('M 768,534 C 768,468 795,435 837,438 C 865,440 872,474 862,505 Z'),
+
+        wheelFrontRight: new Path2D('M 200,628 Q 232,653 270,644 L 272,622 L 198,612 Z'),
+        wheelRearTire: new Path2D('M 792,452 L 824,448 L 808,557 L 774,544 C 762,515 768,472 792,452 Z'),
+        wheelFrontTire: new Path2D('M 482,570 L 522,566 L 502,703 L 456,685 C 440,645 452,592 482,570 Z'),
+
+        carBodySide: new Path2D('M 135,526 L 405,574 L 909,401 C 914,418 902,452 885,472 L 858,492 C 862,458 848,438 824,440 C 796,442 778,472 774,528 L 564,616 C 568,574 552,552 522,554 C 486,556 462,592 454,666 C 425,672 392,670 355,660 L 164,612 C 145,595 138,560 135,526 Z'),
+        carBodyTop: new Path2D('M 135,526 C 148,512 195,494 362,435 L 432,353 C 510,316 615,314 736,332 C 762,337 785,352 805,368 L 882,379 L 898,372 L 909,402 L 412,576 L 135,526 Z'),
+        carFullSilhouette: new Path2D('M 135,526 C 148,512 195,494 362,435 L 432,353 C 510,316 615,314 736,332 C 762,337 785,352 805,368 L 882,379 L 898,372 L 909,402 C 914,418 902,452 885,472 L 858,492 C 862,458 848,438 824,440 C 796,442 778,472 774,528 L 564,616 C 568,574 552,552 522,554 C 486,556 462,592 454,666 C 425,672 392,670 355,660 L 164,612 C 145,595 138,560 135,526 Z'),
+        hoodStripe: polyPath('366,435 452,450 242,554 172,536'),
+        hoodCrease: polyPath('546,480 336,566 368,570 546,480'),
+        sideIntake: polyPath('752,462 778,452 767,516 749,520'),
+        winMain: polyPath('434,356 626,381 596,474 363,436'),
+        winGlassL: polyPath('434,356 508,366 495,405 378,435'),
+        winPillarIn: polyPath('508,366 525,368 505,408 495,405'),
+        winGlassR: polyPath('522,371 544,373 516,396'),
+        sideWin1: polyPath('613,468 640,387 645,456'),
+        sideWin2: polyPath('647,384 725,358 735,420 652,453'),
+        sideWin3: polyPath('733,358 780,403 742,417'),
+        pillar1: polyPath('640,386 646,384 652,453 645,456'),
+        pillar2: polyPath('725,358 732,358 742,417 735,420'),
+        frontPanel: new Path2D('M 135,526 L 415,576 L 424,634 L 144,574 Z'),
+        grille: new Path2D('M 176,540 L 334,580 C 344,583 350,606 346,615 L 182,575 C 175,565 173,548 176,540 Z'),
+        bumperBase: new Path2D('M 136,568 Q 255,612 396,634 L 446,624 C 452,626 452,636 445,640 L 394,648 Q 250,624 136,584 Z'),
+        bumperTop: new Path2D('M 136,568 Q 255,612 396,634 L 446,624 L 445,630 L 395,639 Q 253,616 136,574 Z'),
+        bumperNightHighlight: new Path2D('M 136,568 Q 255,612 396,634 L 446,624 L 445,629 L 395,638 Q 253,615 136,573 Z'),
+
+        beamFar1: polyPath('156,536 -260,625 -260,795 156,570'),
+        beamFar2: polyPath('158,543 -260,652 -260,752 158,563'),
+        beamNear1: polyPath('396,583 -260,735 -105,975 390,620'),
+        beamNear2: polyPath('398,591 -260,765 -150,925 392,613'),
+
+        flareFarH: polyPath('122,561 159,550 196,545 159,556'),
+        flareFarV: polyPath('154,522 161,553 164,584 157,553'),
+        flareNearH: polyPath('350,612 400,597 450,590 400,605'),
+        flareNearV: polyPath('394,562 403,601 406,640 397,601')
+      };
+
+      const ROAD_PEBBLES = [
+        [110, 830, 3], [310, 755, 2.5], [520, 810, 3.5], [670, 710, 2.8],
+        [840, 595, 3], [980, 630, 3.2], [210, 910, 3], [630, 885, 2.8]
+      ];
+
+      const NIGHT_STARS = [
+        [75, 65, 1.6, 0.75], [245, 48, 2.0, 0.85], [330, 110, 1.4, 0.6],
+        [465, 70, 1.8, 0.8], [620, 42, 1.6, 0.7], [715, 92, 2.1, 0.9],
+        [840, 54, 1.5, 0.65], [930, 82, 1.8, 0.75], [395, 158, 1.5, 0.55],
+        [585, 128, 1.6, 0.65], [115, 195, 1.4, 0.5]
+      ];
+
+      const FAR_TREES = [
+        [40, 481.7, 1.05], [190, 431.7, 0.92], [340, 381.7, 1.12], [500, 328.3, 0.98],
+        [650, 278.3, 1.08], [800, 228.3, 0.94], [950, 178.3, 1.10], [1100, 128.3, 0.96]
+      ];
+
+      function fillEllipse(c, cx, cy, rx, ry, rotDeg, fillStyle, alpha) {
+        c.save();
+        if (alpha !== undefined) c.globalAlpha *= alpha;
+        c.translate(cx, cy);
+        if (rotDeg) c.rotate((rotDeg * Math.PI) / 180);
+        c.beginPath();
+        c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        c.fillStyle = fillStyle;
+        c.fill();
+        c.restore();
       }
 
+      function drawTreePineMed(c, x, y, sc) {
+        c.save();
+        c.translate(x, y);
+        if (sc && sc !== 1) c.scale(sc, sc);
+        c.fillStyle = '#10251F'; c.fill(PATHS.treePineMedL);
+        c.fillStyle = '#1E3C31'; c.fill(PATHS.treePineMedR);
+        c.fillStyle = '#132822'; c.fill(PATHS.treePineMedTrunk);
+        fillEllipse(c, 0, 1, 14, 3.5, 0, '#243423');
+        c.restore();
+      }
+
+      function drawTreePineDark(c, x, y) {
+        c.save();
+        c.translate(x, y);
+        c.fillStyle = '#0E221D'; c.fill(PATHS.treePineDarkL);
+        c.fillStyle = '#1C382F'; c.fill(PATHS.treePineDarkR);
+        c.fillStyle = '#162B24'; c.fill(PATHS.treePineDarkTrunk);
+        fillEllipse(c, 0, 1, 16, 4, 0, '#243423');
+        c.restore();
+      }
+
+      function drawTreeOchreMed(c, x, y, sc) {
+        c.save();
+        c.translate(x, y);
+        if (sc && sc !== 1) c.scale(sc, sc);
+        c.fillStyle = '#7A4924'; c.fill(PATHS.treeOchreMedL);
+        c.fillStyle = '#9E7856'; c.fill(PATHS.treeOchreMedR);
+        c.fillStyle = '#532814';
+        c.fill(PATHS.treeOchreMedTrunk);
+        c.fill(PATHS.treeOchreMedBr1);
+        c.fill(PATHS.treeOchreMedBr2);
+        c.fill(PATHS.treeOchreMedBr3);
+        fillEllipse(c, 0, 1, 14, 3.5, 0, '#263624');
+        c.restore();
+      }
+
+      function drawTreeOchreTall(c, x, y) {
+        c.save();
+        c.translate(x, y);
+        c.fillStyle = '#7A4924'; c.fill(PATHS.treeOchreTallL);
+        c.fillStyle = '#9E7856'; c.fill(PATHS.treeOchreTallR);
+        c.fillStyle = '#532814';
+        c.fill(PATHS.treeOchreTallTrunk);
+        c.fill(PATHS.treeOchreTallBr1);
+        c.fill(PATHS.treeOchreTallBr2);
+        c.fill(PATHS.treeOchreTallBr3);
+        fillEllipse(c, 0, 1, 16, 4, 0, '#263624');
+        c.restore();
+      }
+
+      function drawTreeGreenTall(c, x, y) {
+        c.save();
+        c.translate(x, y);
+        c.fillStyle = '#102822'; c.fill(PATHS.treeGreenTallL);
+        c.fillStyle = '#2A4B3C'; c.fill(PATHS.treeGreenTallR);
+        c.fillStyle = '#3B2316';
+        c.fill(PATHS.treeGreenTallTrunk);
+        c.fill(PATHS.treeGreenTallBr1);
+        c.fill(PATHS.treeGreenTallBr2);
+        fillEllipse(c, 0, 1, 18, 4.5, 0, '#263624');
+        c.restore();
+      }
+
+      function drawTreeThickTrunk(c, x, y) {
+        c.save();
+        c.translate(x, y);
+        c.fillStyle = '#602F17'; c.fill(PATHS.thickTrunkMain);
+        c.fillStyle = '#7A4421';
+        c.fill(PATHS.thickTrunkH1);
+        c.fill(PATHS.thickTrunkH2);
+        c.fill(PATHS.thickTrunkH3);
+        c.fillStyle = '#68381B'; c.fill(PATHS.thickTrunkBr);
+        fillEllipse(c, -1, 2, 46, 7, 0, '#263624');
+        c.restore();
+      }
+
+      function drawShadow(c, pathObj, x, y, color, alpha) {
+        c.save();
+        c.translate(x, y);
+        c.globalAlpha = alpha;
+        c.fillStyle = color;
+        c.fill(pathObj);
+        c.restore();
+      }
+
+      // Предварительно созданные градиенты для ночного режима
+      let GRADS = null;
+      function ensureGradients(c) {
+        if (GRADS) return GRADS;
+        const nightSky = c.createLinearGradient(0, 0, 0, 650);
+        nightSky.addColorStop(0, '#040A11');
+        nightSky.addColorStop(0.55, '#0A1724');
+        nightSky.addColorStop(1, '#102530');
+
+        const moonHalo = c.createRadialGradient(155, 115, 0, 155, 115, 76);
+        moonHalo.addColorStop(0, 'rgba(214, 238, 248, 0.32)');
+        moonHalo.addColorStop(0.45, 'rgba(184, 216, 232, 0.14)');
+        moonHalo.addColorStop(1, 'rgba(184, 216, 232, 0)');
+
+        const nightEnv = c.createLinearGradient(0, 0, 0, 2200);
+        nightEnv.addColorStop(0, 'rgba(4, 11, 18, 0.72)');
+        nightEnv.addColorStop(0.5, 'rgba(7, 19, 30, 0.68)');
+        nightEnv.addColorStop(1, 'rgba(10, 19, 28, 0.75)');
+
+        const beamFar = c.createLinearGradient(160, 552, -240, 715);
+        beamFar.addColorStop(0, 'rgba(255, 249, 223, 0.65)');
+        beamFar.addColorStop(0.28, 'rgba(255, 228, 158, 0.34)');
+        beamFar.addColorStop(0.7, 'rgba(246, 200, 110, 0.10)');
+        beamFar.addColorStop(1, 'rgba(246, 200, 110, 0)');
+
+        const beamNear = c.createLinearGradient(398, 602, -190, 855);
+        beamNear.addColorStop(0, 'rgba(255, 251, 239, 0.76)');
+        beamNear.addColorStop(0.25, 'rgba(255, 231, 168, 0.42)');
+        beamNear.addColorStop(0.68, 'rgba(246, 200, 110, 0.14)');
+        beamNear.addColorStop(1, 'rgba(246, 200, 110, 0)');
+
+        const haloUnit = c.createRadialGradient(0, 0, 0, 0, 0, 100);
+        haloUnit.addColorStop(0, 'rgba(255, 253, 242, 0.95)');
+        haloUnit.addColorStop(0.28, 'rgba(255, 232, 158, 0.75)');
+        haloUnit.addColorStop(0.6, 'rgba(255, 174, 56, 0.32)');
+        haloUnit.addColorStop(1, 'rgba(255, 148, 25, 0)');
+
+        const coreUnit = c.createRadialGradient(0, 0, 0, 0, 0, 100);
+        coreUnit.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        coreUnit.addColorStop(0.55, 'rgba(255, 245, 200, 0.92)');
+        coreUnit.addColorStop(0.85, 'rgba(255, 202, 87, 0.45)');
+        coreUnit.addColorStop(1, 'rgba(255, 202, 87, 0)');
+
+        const roadPoolUnit = c.createRadialGradient(-15, -8, 0, 0, 0, 100);
+        roadPoolUnit.addColorStop(0, 'rgba(255, 243, 196, 0.48)');
+        roadPoolUnit.addColorStop(0.5, 'rgba(245, 202, 123, 0.20)');
+        roadPoolUnit.addColorStop(1, 'rgba(245, 202, 123, 0)');
+
+        const tailGlowUnit = c.createRadialGradient(0, 0, 0, 0, 0, 100);
+        tailGlowUnit.addColorStop(0, 'rgba(255, 59, 31, 0.62)');
+        tailGlowUnit.addColorStop(0.5, 'rgba(224, 30, 8, 0.22)');
+        tailGlowUnit.addColorStop(1, 'rgba(224, 30, 8, 0)');
+
+        const dustUnit = c.createRadialGradient(0, 0, 0, 0, 0, 100);
+        dustUnit.addColorStop(0, 'rgba(229, 200, 155, 0.85)');
+        dustUnit.addColorStop(0.55, 'rgba(222, 192, 146, 0.4)');
+        dustUnit.addColorStop(1, 'rgba(222, 192, 146, 0)');
+
+        GRADS = { nightSky, moonHalo, nightEnv, beamFar, beamNear, haloUnit, coreUnit, roadPoolUnit, tailGlowUnit, dustUnit };
+        return GRADS;
+      }
+
+      function fillUnitGradientEllipse(c, cx, cy, rx, ry, rotDeg, grad) {
+        c.save();
+        c.translate(cx, cy);
+        if (rotDeg) c.rotate((rotDeg * Math.PI) / 180);
+        c.scale(rx / 100, ry / 100);
+        c.beginPath();
+        c.arc(0, 0, 100, 0, Math.PI * 2);
+        c.fillStyle = grad;
+        c.fill();
+        c.restore();
+      }
+
+      // Частицы дорожной пыли (рисуются напрямую в том же 2D Canvas)
       const dustParticles = [];
-      const MAX_DUST = 12;
-
-      function initDust() {
-        if (!dustLayer) return;
-        for (let i = 0; i < MAX_DUST; i++) {
-          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', '0');
-          circle.setAttribute('cy', '0');
-          circle.setAttribute('r', '10');
-          circle.setAttribute('fill', 'url(#dust-puff-grad)');
-          circle.setAttribute('class', 'gpu-layer');
-          circle.setAttribute('opacity', '0');
-          dustLayer.appendChild(circle);
-          dustParticles.push({
-            el: circle,
-            x: 0,
-            y: 0,
-            r: 3.5,
-            life: Math.random(),
-            maxLife: 0.65 + Math.random() * 0.45,
-            source: i % 2 === 0 ? 'front' : 'rear'
-          });
-        }
+      const MAX_DUST = 10;
+      for (let i = 0; i < MAX_DUST; i++) {
+        dustParticles.push({
+          x: 0,
+          y: 0,
+          r: 3.5,
+          alpha: 0,
+          scale: 1,
+          life: Math.random(),
+          maxLife: 0.65 + Math.random() * 0.45,
+          source: i % 2 === 0 ? 'front' : 'rear'
+        });
       }
-      initDust();
 
       function updateDust(dt, speedFactor) {
         const isLaunching = state.driveMode === 'departing';
@@ -1051,15 +894,11 @@ jobs:
         const activeDust = (speedFactor > 0.08 || isLaunching) && carVisible;
 
         if (!activeDust) {
-          if (!state.dustIdleHidden) {
-            for (let i = 0; i < dustParticles.length; i++) {
-              safeSetAttr(dustParticles[i].el, 'opacity', '0');
-            }
-            state.dustIdleHidden = true;
+          for (let i = 0; i < dustParticles.length; i++) {
+            dustParticles[i].alpha = 0;
           }
           return;
         }
-        state.dustIdleHidden = false;
 
         const boostFactor = isLaunching ? 2.5 : 1.0;
         const carX = state.carOffsetX;
@@ -1086,16 +925,414 @@ jobs:
           p.x += moveDist;
           p.y += moveDist * SLOPE - dt * 14;
 
-          const scale = (p.r * (1 + progress * 1.9)) / 10;
-          const alpha = Math.sin(progress * Math.PI) * (isLaunching ? 0.46 : 0.28) * Math.min(1.25, speedFactor + (isLaunching ? 0.8 : 0));
-
-          safeSetAttr(
-            p.el,
-            'transform',
-            'translate(' + p.x.toFixed(1) + ', ' + p.y.toFixed(1) + ') scale(' + scale.toFixed(2) + ')'
-          );
-          safeSetAttr(p.el, 'opacity', Math.max(0, alpha).toFixed(2));
+          p.scale = (p.r * (1 + progress * 1.9)) / 10;
+          p.alpha = Math.max(0, Math.sin(progress * Math.PI) * (isLaunching ? 0.46 : 0.28) * Math.min(1.25, speedFactor + (isLaunching ? 0.8 : 0)));
         }
+      }
+
+      function renderSceneCanvas() {
+        if (!ctx) return;
+        ctx.setTransform(0.72, 0, 0, 0.72, 0, 0);
+        const g = ensureGradients(ctx);
+
+        // 1. Небо (дневное или ночное)
+        if (!state.lightsOn) {
+          ctx.fillStyle = '#18352D';
+          ctx.fillRect(0, 0, 1000, 2200);
+        } else {
+          ctx.fillStyle = g.nightSky;
+          ctx.fillRect(0, 0, 1000, 650);
+          ctx.fillStyle = '#18352D';
+          ctx.fillRect(0, 650, 1000, 1550);
+
+          ctx.fillStyle = g.moonHalo;
+          ctx.beginPath();
+          ctx.arc(155, 115, 76, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.save();
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#EBF6FA';
+          ctx.fill(PATHS.moonCrescent);
+          ctx.restore();
+
+          const starPulse = 0.84 + Math.sin(state.time * 2.6) * 0.16;
+          ctx.fillStyle = '#E8F4F8';
+          for (let i = 0; i < NIGHT_STARS.length; i++) {
+            const st = NIGHT_STARS[i];
+            ctx.globalAlpha = st[3] * starPulse;
+            ctx.beginPath();
+            ctx.arc(st[0], st[1], st[2], 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        // 2. Дальний лес (2 тайла покрывают весь экран 0..1000)
+        const farX = ((state.scrollFar % LOOP_WIDTH) + LOOP_WIDTH) % LOOP_WIDTH;
+        for (let t = -1; t <= 0; t++) {
+          const tx = farX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          for (let i = 0; i < FAR_TREES.length; i++) {
+            const ft = FAR_TREES[i];
+            ctx.save();
+            ctx.translate(ft[0], ft[1]);
+            ctx.scale(ft[2], ft[2]);
+            ctx.fillStyle = '#112620'; ctx.fill(PATHS.bgPineL);
+            ctx.fillStyle = '#1B3830'; ctx.fill(PATHS.bgPineR);
+            ctx.restore();
+          }
+          ctx.restore();
+        }
+
+        // 3. Травяной склон
+        ctx.fillStyle = '#51603C'; ctx.fill(PATHS.grassSlopeMain);
+        ctx.fillStyle = '#465534'; ctx.fill(PATHS.grassSlopeTop);
+
+        const midX = ((state.scrollMid % LOOP_WIDTH) + LOOP_WIDTH) % LOOP_WIDTH;
+        const frontX = ((state.scrollFront % LOOP_WIDTH) + LOOP_WIDTH) % LOOP_WIDTH;
+
+        // Детали травы
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = '#445433';
+        for (let t = -1; t <= 0; t++) {
+          const tx = frontX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          for (let i = 0; i < PATHS.grassStrokes.length; i++) {
+            ctx.fill(PATHS.grassStrokes[i]);
+          }
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // Падающие тени деревьев на травяном склоне
+        ctx.save();
+        ctx.clip(PATHS.grassBankClip);
+        for (let t = -1; t <= 0; t++) {
+          const tx = midX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          drawShadow(ctx, PATHS.shadowMd, 150, 478, '#2A3927', 0.55);
+          drawShadow(ctx, PATHS.shadowLg, 375, 403, '#2A3927', 0.65);
+          drawShadow(ctx, PATHS.shadowMd, 690, 298, '#2A3927', 0.55);
+          drawShadow(ctx, PATHS.shadowMd, 945, 213, '#2A3927', 0.55);
+          drawShadow(ctx, PATHS.shadowLg, 1125, 153, '#2A3927', 0.65);
+          ctx.restore();
+        }
+        for (let t = -1; t <= 0; t++) {
+          const tx = frontX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          drawShadow(ctx, PATHS.shadowLg, 84, 539, '#2A3927', 0.65);
+          drawShadow(ctx, PATHS.shadowLg, 231, 490, '#2A3927', 0.65);
+          drawShadow(ctx, PATHS.shadowTrunk, 546, 385, '#273624', 0.7);
+          drawShadow(ctx, PATHS.shadowMd, 816, 295, '#2A3927', 0.55);
+          drawShadow(ctx, PATHS.shadowMd, 1035, 222, '#2A3927', 0.55);
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // 4. Средний ряд деревьев
+        for (let t = -1; t <= 0; t++) {
+          const tx = midX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          drawTreePineMed(ctx, 150, 478, 0.94);
+          drawTreePineDark(ctx, 375, 403);
+          drawTreePineMed(ctx, 690, 298, 1);
+          drawTreePineMed(ctx, 945, 213, 0.92);
+          drawTreeOchreMed(ctx, 1125, 153, 0.95);
+          ctx.restore();
+        }
+
+        // 5. Передний ряд деревьев
+        for (let t = -1; t <= 0; t++) {
+          const tx = frontX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          drawTreeOchreMed(ctx, 1035, 222, 1);
+          drawTreeOchreMed(ctx, 816, 295, 1);
+          drawTreeThickTrunk(ctx, 546, 385);
+          drawTreeOchreTall(ctx, 231, 490);
+          drawTreeGreenTall(ctx, 84, 539);
+          ctx.restore();
+        }
+
+        // 6. Дорога и текстура гравия
+        ctx.fillStyle = '#CCA36E'; ctx.fill(PATHS.roadMain);
+        ctx.save();
+        ctx.globalAlpha = 0.65;
+        ctx.fillStyle = '#B68D58'; ctx.fill(PATHS.roadEdge);
+        ctx.restore();
+
+        const roadX = ((state.scrollRoad % LOOP_WIDTH) + LOOP_WIDTH) % LOOP_WIDTH;
+        for (let t = -1; t <= 0; t++) {
+          const tx = roadX + t * LOOP_WIDTH;
+          const ty = tx * SLOPE;
+          ctx.save();
+          ctx.translate(tx, ty);
+          ctx.globalAlpha = 0.58;
+          ctx.fillStyle = '#B98E57';
+          for (let i = 0; i < PATHS.roadStrokes.length; i++) {
+            ctx.fill(PATHS.roadStrokes[i]);
+          }
+          ctx.globalAlpha = 0.55;
+          ctx.fillStyle = '#D8B27E';
+          for (let i = 0; i < ROAD_PEBBLES.length; i++) {
+            const pb = ROAD_PEBBLES[i];
+            ctx.beginPath();
+            ctx.arc(pb[0], pb[1], pb[2], 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // 7. Частицы пыли из-под колес
+        for (let i = 0; i < dustParticles.length; i++) {
+          const p = dustParticles[i];
+          if (p.alpha <= 0.01) continue;
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          const r = 10 * p.scale;
+          ctx.translate(p.x, p.y);
+          ctx.scale(r / 100, r / 100);
+          ctx.beginPath();
+          ctx.arc(0, 0, 100, 0, Math.PI * 2);
+          ctx.fillStyle = g.dustUnit;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 8. Ночное затенение окружения
+        if (state.lightsOn) {
+          ctx.fillStyle = g.nightEnv;
+          ctx.fillRect(0, 0, 1000, 2200);
+        }
+
+        // 9. Автомобиль (единый риг)
+        if (state.driveMode === 'away') return;
+
+        const moveX = state.carOffsetX;
+        const moveY = moveX * SLOPE;
+        ctx.save();
+        ctx.translate(moveX, moveY);
+
+        // Освещение дороги перед авто и отсвет заднего фонаря ночью
+        if (state.lightsOn) {
+          fillUnitGradientEllipse(ctx, 45, 742, 340, 105, -18.43, g.roadPoolUnit);
+          fillUnitGradientEllipse(ctx, 918, 488, 78, 29, -18.43, g.tailGlowUnit);
+        }
+
+        // Тень под автомобилем
+        ctx.fillStyle = '#3D2417';
+        ctx.fill(PATHS.carShadow);
+
+        // Расчет подвески
+        const speedMult = state.speedKmh / 50;
+        const speedNorm = state.speedKmh / 90;
+        const waveFreq = 3.2 + Math.min(speedNorm, 3.2) * 2.4;
+        const roadWaveFront = Math.sin(state.time * waveFreq) * 0.72 + Math.sin(state.time * waveFreq * 2.15 + 0.9) * 0.28;
+        const roadWaveRear = Math.sin(state.time * waveFreq - 0.72) * 0.72 + Math.sin(state.time * waveFreq * 2.15 + 0.15) * 0.28;
+        const engineMicroVib = Math.sin(state.time * (38 + speedMult * 6)) * 0.18;
+        const highSpeedDamping = speedMult > 2.5 ? Math.max(0.68, 1 - (speedMult - 2.5) * 0.08) : 1.0;
+        const aeroSquatY = Math.min(1.2, speedMult * 0.2) + state.maneuverSquatY;
+        const travelAmp = (1.2 + Math.min(speedNorm, 1.8) * 0.48) * highSpeedDamping * state.bounceScale;
+
+        const suspFrontY = roadWaveFront * travelAmp + engineMicroVib * state.bounceScale + aeroSquatY;
+        const suspRearY = roadWaveRear * travelAmp * 0.9 + engineMicroVib * state.bounceScale + aeroSquatY * 1.1;
+        const chassisHeaveY = (suspFrontY + suspRearY) * 0.5;
+        const chassisPitchRad = (((suspRearY - suspFrontY) * 0.085 + state.maneuverPitch) * Math.PI) / 180;
+        const frontTireComp = (suspFrontY - aeroSquatY) * 0.24;
+        const rearTireComp = (suspRearY - aeroSquatY) * 0.24;
+
+        // Ниши колесных арок и днище
+        ctx.save();
+        ctx.translate(0, chassisHeaveY);
+        ctx.translate(660, 560);
+        ctx.rotate(chassisPitchRad);
+        ctx.translate(-660, -560);
+        ctx.fillStyle = '#351A0F'; ctx.fill(PATHS.underbodyMain);
+        ctx.fillStyle = '#2E150B';
+        ctx.fill(PATHS.underbodyArchF);
+        ctx.fill(PATHS.underbodyArchR);
+        ctx.restore();
+
+        // Правое переднее (дальнее) колесо
+        ctx.save();
+        ctx.translate(0, frontTireComp * 0.8);
+        ctx.fillStyle = '#3B1E12';
+        ctx.fill(PATHS.wheelFrontRight);
+        ctx.restore();
+
+        const maneuverWheelBoost = Math.abs(state.carVelX) / 310;
+        const effectiveMult = speedMult + maneuverWheelBoost * 1.8;
+        const blurRatio = Math.max(0, Math.min(0.85, (effectiveMult - 2.2) / 2.8));
+
+        // Заднее левое колесо
+        ctx.save();
+        ctx.translate(0, rearTireComp);
+        ctx.fillStyle = '#3B1E12';
+        ctx.fill(PATHS.wheelRearTire);
+        ctx.translate(820, 503);
+        ctx.rotate((12 * Math.PI) / 180);
+        fillEllipse(ctx, 0, 0, 33, 53, 0, '#4B2515');
+        fillEllipse(ctx, 4, 1, 20, 37, 0, '#E5C48B');
+        fillEllipse(ctx, -1, 0, 16, 31, 0, '#8A623A');
+        ctx.save();
+        ctx.scale(0.52, 1);
+        ctx.save();
+        ctx.rotate(state.wheelAngle * 1.12);
+        ctx.strokeStyle = '#6E4A26'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(26, 0); ctx.moveTo(0, -26); ctx.lineTo(0, 26); ctx.stroke();
+        ctx.strokeStyle = '#A67B4E'; ctx.lineWidth = 3.5;
+        ctx.beginPath(); ctx.moveTo(-18, -18); ctx.lineTo(18, 18); ctx.stroke();
+        ctx.strokeStyle = '#5A391E';
+        ctx.beginPath(); ctx.moveTo(-18, 18); ctx.lineTo(18, -18); ctx.stroke();
+        ctx.restore();
+        if (blurRatio > 0.05) {
+          ctx.save();
+          ctx.globalAlpha = blurRatio;
+          ctx.rotate(-state.wheelAngle * 0.7);
+          ctx.strokeStyle = '#B88E5A'; ctx.lineWidth = 4; ctx.setLineDash([28, 14]);
+          ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = '#6E4A26'; ctx.lineWidth = 3.5; ctx.setLineDash([16, 10]);
+          ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+        fillEllipse(ctx, 0, 0, 5.5, 10, 0, '#5A391E');
+        fillEllipse(ctx, 1, 0, 2.5, 4.5, 0, '#D5B88B');
+        ctx.restore();
+
+        // Переднее левое колесо
+        ctx.save();
+        ctx.translate(0, frontTireComp);
+        ctx.fillStyle = '#3B1E12';
+        ctx.fill(PATHS.wheelFrontTire);
+        ctx.translate(512, 635);
+        ctx.rotate((12 * Math.PI) / 180);
+        fillEllipse(ctx, 0, 0, 43, 67, 0, '#4B2515');
+        fillEllipse(ctx, 5, 2, 26, 45, 0, '#E5C48B');
+        fillEllipse(ctx, -2, 0, 21, 38, 0, '#8A623A');
+        ctx.save();
+        ctx.scale(0.55, 1);
+        ctx.save();
+        ctx.rotate(state.wheelAngle);
+        ctx.strokeStyle = '#6E4A26'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(-32, 0); ctx.lineTo(32, 0); ctx.moveTo(0, -32); ctx.lineTo(0, 32); ctx.stroke();
+        ctx.strokeStyle = '#A67B4E'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(-22, -22); ctx.lineTo(22, 22); ctx.stroke();
+        ctx.strokeStyle = '#5A391E';
+        ctx.beginPath(); ctx.moveTo(-22, 22); ctx.lineTo(22, -22); ctx.stroke();
+        ctx.restore();
+        if (blurRatio > 0.05) {
+          ctx.save();
+          ctx.globalAlpha = blurRatio;
+          ctx.rotate(-state.wheelAngle * 0.6);
+          ctx.strokeStyle = '#B88E5A'; ctx.lineWidth = 5; ctx.setLineDash([34, 16]);
+          ctx.beginPath(); ctx.arc(0, 0, 25, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = '#6E4A26'; ctx.lineWidth = 4; ctx.setLineDash([20, 12]);
+          ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+        fillEllipse(ctx, 0, 0, 7, 13, 0, '#5A391E');
+        fillEllipse(ctx, 1.5, 0, 3.2, 6, 0, '#E5C48B');
+        ctx.restore();
+
+        // Кузов автомобиля
+        ctx.save();
+        ctx.translate(0, chassisHeaveY);
+        ctx.translate(660, 560);
+        ctx.rotate(chassisPitchRad);
+        ctx.translate(-660, -560);
+
+        ctx.fillStyle = '#C85E18'; ctx.fill(PATHS.carBodySide);
+        ctx.fillStyle = '#F18121'; ctx.fill(PATHS.carBodyTop);
+        ctx.fillStyle = '#C6601A'; ctx.fill(PATHS.hoodStripe);
+        ctx.fillStyle = '#BA5516'; ctx.fill(PATHS.hoodCrease);
+        ctx.fillStyle = '#A84912'; ctx.fill(PATHS.sideIntake);
+
+        ctx.fillStyle = '#5E2715'; ctx.fill(PATHS.winMain);
+        ctx.fillStyle = '#7A6832'; ctx.fill(PATHS.winGlassL);
+        ctx.fillStyle = '#4E2514'; ctx.fill(PATHS.winPillarIn);
+        ctx.fillStyle = '#6E6032'; ctx.fill(PATHS.winGlassR);
+
+        ctx.fillStyle = '#5E2715';
+        ctx.fill(PATHS.sideWin1);
+        ctx.fill(PATHS.sideWin2);
+        ctx.fill(PATHS.sideWin3);
+
+        ctx.fillStyle = '#D5B88B';
+        ctx.fill(PATHS.pillar1);
+        ctx.fill(PATHS.pillar2);
+
+        ctx.fillStyle = '#85481B'; ctx.fill(PATHS.frontPanel);
+        fillEllipse(ctx, 400, 601, 21, 22, -10, '#6B3714');
+        ctx.fillStyle = '#351B0F'; ctx.fill(PATHS.grille);
+        fillEllipse(ctx, 159, 553, 10.5, 17, -16, '#F4D399');
+        fillEllipse(ctx, 400, 601, 15.5, 18.5, -10, '#F5D59B');
+
+        ctx.fillStyle = '#9B7753'; ctx.fill(PATHS.bumperBase);
+        ctx.fillStyle = '#B08960'; ctx.fill(PATHS.bumperTop);
+
+        // Ночные эффекты на кузове и свет фар
+        if (state.lightsOn) {
+          ctx.save();
+          ctx.globalAlpha = 0.52;
+          ctx.fillStyle = '#07131E';
+          ctx.fill(PATHS.carFullSilhouette);
+          ctx.restore();
+
+          fillEllipse(ctx, 160, 553, 16, 22, -16, '#FFAE42', 0.55);
+          fillEllipse(ctx, 400, 601, 23, 25, -10, '#FFAE42', 0.55);
+
+          ctx.save();
+          ctx.globalAlpha = 0.75;
+          ctx.fillStyle = '#FFE39F';
+          ctx.fill(PATHS.bumperNightHighlight);
+          ctx.restore();
+
+          // Объемные лучи передних фар
+          ctx.save();
+          ctx.fillStyle = g.beamFar;
+          ctx.globalAlpha = 0.55; ctx.fill(PATHS.beamFar1);
+          ctx.globalAlpha = 0.85; ctx.fill(PATHS.beamFar2);
+
+          ctx.fillStyle = g.beamNear;
+          ctx.globalAlpha = 0.55; ctx.fill(PATHS.beamNear1);
+          ctx.globalAlpha = 0.88; ctx.fill(PATHS.beamNear2);
+          ctx.restore();
+
+          // Светящиеся линзы фар и ореолы
+          fillUnitGradientEllipse(ctx, 159, 553, 34, 44, -16, g.haloUnit);
+          fillUnitGradientEllipse(ctx, 159, 553, 16, 24, -16, g.coreUnit);
+          fillEllipse(ctx, 159, 553, 7.5, 12.5, -16, '#FFFFFF');
+          ctx.save();
+          ctx.globalAlpha = 0.9; ctx.fillStyle = '#FFFFFF'; ctx.fill(PATHS.flareFarH);
+          ctx.globalAlpha = 0.75; ctx.fillStyle = '#FFF7D6'; ctx.fill(PATHS.flareFarV);
+          ctx.restore();
+
+          fillUnitGradientEllipse(ctx, 400, 601, 48, 54, -10, g.haloUnit);
+          fillUnitGradientEllipse(ctx, 400, 601, 22, 26, -10, g.coreUnit);
+          fillEllipse(ctx, 400, 601, 11, 13.5, -10, '#FFFFFF');
+          ctx.save();
+          ctx.globalAlpha = 0.95; ctx.fillStyle = '#FFFFFF'; ctx.fill(PATHS.flareNearH);
+          ctx.globalAlpha = 0.8; ctx.fillStyle = '#FFF7D6'; ctx.fill(PATHS.flareNearV);
+          ctx.restore();
+        }
+
+        ctx.restore();
+        ctx.restore();
       }
 
       // ==================== ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API V8 + UI SFX) ====================
@@ -1249,11 +1486,7 @@ jobs:
         }
 
         state.lightsOn = shouldBeNight;
-        const nightVal = shouldBeNight ? '1' : '0';
-        safeSetAttr(nightSkyLayer, 'opacity', nightVal);
-        safeSetAttr(eveningOverlay, 'opacity', nightVal);
-        safeSetAttr(roadNightLighting, 'opacity', nightVal);
-        safeSetAttr(carNightEffects, 'opacity', nightVal);
+        if (appShell) appShell.style.backgroundColor = shouldBeNight ? '#3A342B' : '#CCA36E';
 
 
       }
@@ -1332,9 +1565,7 @@ jobs:
         state.maneuverPitch += (targetPitch - state.maneuverPitch) * Math.min(1, dt * 10);
         state.maneuverSquatY += (targetSquatY - state.maneuverSquatY) * Math.min(1, dt * 10);
 
-        const moveX = state.carOffsetX;
-        const moveY = moveX * SLOPE;
-        safeSetAttr(carMaster, 'transform', 'translate(' + moveX.toFixed(2) + ', ' + moveY.toFixed(2) + ')');
+
       }
 
       // ==================== ЛОГИКА ВИКТОРИНЫ ====================
@@ -1706,7 +1937,7 @@ jobs:
         }
       });
 
-      // ==================== ГЛАВНЫЙ ЦИКЛ АНИМАЦИИ (60 FPS) ====================
+      // ==================== ГЛАВНЫЙ ЦИКЛ АНИМАЦИИ (60 FPS НА 2D CANVAS БЕЗ МИГАНИЙ) ====================
       let lastTimestamp = performance.now();
 
       function animate(now) {
@@ -1719,11 +1950,9 @@ jobs:
           // Плавный разгон/торможение до целевой скорости текущего вопроса
           state.speedKmh += (state.targetSpeedKmh - state.speedKmh) * Math.min(1, dt * 3.8);
 
-
           // Обновляем маневр выезда за кадр / возврата
           updateCarManeuver(dt);
 
-          const speedMult = state.speedKmh / 50;
           const speedNorm = state.speedKmh / 90;
           const maneuverWheelBoost = Math.abs(state.carVelX) / 310;
           const effectiveWheelSpeed = speedNorm + maneuverWheelBoost;
@@ -1735,82 +1964,21 @@ jobs:
           state.scrollFront = (state.scrollFront + baseScrollSpeed * 1.0 * dt) % LOOP_WIDTH;
           state.scrollRoad = (state.scrollRoad + baseScrollSpeed * 1.45 * dt) % LOOP_WIDTH;
 
-          updateLayerPosition(farLayer, state.scrollFar);
-          updateLayerPosition(shadowsMidLayer, state.scrollMid);
-          updateLayerPosition(midLayer, state.scrollMid);
-          updateLayerPosition(shadowsFrontLayer, state.scrollFront);
-          updateLayerPosition(frontLayer, state.scrollFront);
-          updateLayerPosition(grassLayer, state.scrollFront);
-          updateLayerPosition(roadLayer, state.scrollRoad);
-
-          // 2. Вращение колес и работа подвески
+          // 2. Вращение колес и звук мотора
           if (state.driveMode !== 'away') {
             state.wheelAngle = (state.wheelAngle - dt * 11.5 * effectiveWheelSpeed) % (Math.PI * 2);
-            const deg = (state.wheelAngle * 180) / Math.PI;
-            safeSetAttr(frontSpinner, 'transform', 'rotate(' + deg.toFixed(1) + ')');
-            safeSetAttr(rearSpinner, 'transform', 'rotate(' + (deg * 1.12).toFixed(1) + ')');
-
-            const effectiveMult = speedMult + maneuverWheelBoost * 1.8;
-            const blurRatio = Math.max(0, Math.min(0.85, (effectiveMult - 2.2) / 2.8));
-            const roundedBlur = Math.round(blurRatio * 100) / 100;
-
-            if (roundedBlur !== state.lastBlurOpacity) {
-              safeSetAttr(frontWheelBlur, 'opacity', roundedBlur.toFixed(2));
-              safeSetAttr(rearWheelBlur, 'opacity', roundedBlur.toFixed(2));
-              state.lastBlurOpacity = roundedBlur;
-            }
-            if (roundedBlur > 0) {
-              safeSetAttr(frontWheelBlur, 'transform', 'rotate(' + (-deg * 0.6).toFixed(1) + ')');
-              safeSetAttr(rearWheelBlur, 'transform', 'rotate(' + (-deg * 0.7).toFixed(1) + ')');
-            }
-
-            // Физика подвески
             const waveFreq = 3.2 + Math.min(speedNorm, 3.2) * 2.4;
-            const roadWaveFront = Math.sin(state.time * waveFreq) * 0.72 + Math.sin(state.time * waveFreq * 2.15 + 0.9) * 0.28;
-            const roadWaveRear = Math.sin(state.time * waveFreq - 0.72) * 0.72 + Math.sin(state.time * waveFreq * 2.15 + 0.15) * 0.28;
-            const engineMicroVib = Math.sin(state.time * (38 + speedMult * 6)) * 0.18;
-
-            const highSpeedDamping = speedMult > 2.5 ? Math.max(0.68, 1 - (speedMult - 2.5) * 0.08) : 1.0;
-            const aeroSquatY = Math.min(1.2, speedMult * 0.2) + state.maneuverSquatY;
-            const travelAmp = (1.2 + Math.min(speedNorm, 1.8) * 0.48) * highSpeedDamping * state.bounceScale;
-
-            const suspFrontY = roadWaveFront * travelAmp + engineMicroVib * state.bounceScale + aeroSquatY;
-            const suspRearY = roadWaveRear * travelAmp * 0.9 + engineMicroVib * state.bounceScale + aeroSquatY * 1.1;
-
-            const chassisHeaveY = (suspFrontY + suspRearY) * 0.5;
-            const chassisPitchDeg = (suspRearY - suspFrontY) * 0.085 + state.maneuverPitch;
-
-            const frontTireCompression = (suspFrontY - aeroSquatY) * 0.24;
-            const rearTireCompression = (suspRearY - aeroSquatY) * 0.24;
-
-            safeSetAttr(wheelFront, 'transform', 'translate(0, ' + frontTireCompression.toFixed(2) + ')');
-            safeSetAttr(wheelRear, 'transform', 'translate(0, ' + rearTireCompression.toFixed(2) + ')');
-            safeSetAttr(wheelFrontRight, 'transform', 'translate(0, ' + (frontTireCompression * 0.8).toFixed(2) + ')');
-
-            const bodyTransform = 'translate(0, ' + chassisHeaveY.toFixed(2) + ') rotate(' + chassisPitchDeg.toFixed(3) + ', 660, 560)';
-            safeSetAttr(carBody, 'transform', bodyTransform);
-            safeSetAttr(carUnderbody, 'transform', bodyTransform);
-
-            const shadowScale = 1 - chassisHeaveY * 0.0018;
-            safeSetAttr(
-              carShadow,
-              'transform',
-              'translate(485, 620) scale(' + shadowScale.toFixed(4) + ', ' + shadowScale.toFixed(4) + ') translate(-485, -620)'
-            );
-
-            updateEngineAudio(state.speedKmh, chassisHeaveY);
+            const bounceApprox = Math.sin(state.time * waveFreq) * state.bounceScale;
+            updateEngineAudio(state.speedKmh, bounceApprox);
           } else {
             updateEngineAudio(state.speedKmh, 0);
           }
 
-          // 3. Мерцание звезд в ночном режиме
-          if (state.lightsOn && nightStars) {
-            const starPulse = 0.82 + Math.sin(state.time * 2.6) * 0.18;
-            safeSetAttr(nightStars, 'opacity', starPulse.toFixed(2));
-          }
-
-          // 4. Частицы дорожной пыли
+          // 3. Частицы дорожной пыли
           updateDust(dt, speedNorm);
+
+          // 4. Атомарная отрисовка всего кадра на 2D Canvas (двойная буферизация без миганий)
+          renderSceneCanvas();
         } catch (err) {}
 
         requestAnimationFrame(animate);
